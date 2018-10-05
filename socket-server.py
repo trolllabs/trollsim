@@ -12,6 +12,8 @@ def udp_server(address):
 			data, addr = sock.recvfrom(1024)
 			print(data.hex().upper())
 	except socket.error as e:
+		sys.stderr.write('Socket Error: %s' % str(e))
+	except Exception as e:
 		sys.stderr.write('Error: %s' % str(e))
 	finally:
 		sock.close()
