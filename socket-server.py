@@ -19,7 +19,7 @@ def udp_server(address):
 		sys.exit(0)
 
 
-address = 'localhost'
+address = '0.0.0.0'
 port = 49000
 
 udp_server((address, port))
