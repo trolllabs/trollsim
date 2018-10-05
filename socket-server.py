@@ -9,8 +9,8 @@ def udp_server(address):
 		sock.bind(address)
 		print('Ok')
 		while True:
-			data, addr = sock.recvfrom(4096)
-			print(data.decode('utf-8').strip())
+			data, addr = sock.recvfrom(1024)
+			print(data.hex().upper())
 	except socket.error as e:
 		sys.stderr.write('Error: %s' % str(e))
 	finally:
