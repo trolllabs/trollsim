@@ -31,10 +31,11 @@ void setup() {
   for (int cal_int = 0; cal_int < 1000 ; cal_int ++){                  //Read the raw acc and gyro data from the MPU-6050 for 1000 times
     read_mpu_6050_data();                                             
     gyro_x_cal += gyro_x;                                              //Add the gyro x offset to the gyro_x_cal variable
-    gyro_y_cal += gyro_y;                                              //Add the gyro y offset to the gyro_y_cal variable
+    gyro_y_cal += gyro_y;    1                                          //Add the gyro y offset to the gyro_y_cal variable
     gyro_z_cal += gyro_z;                                              //Add the gyro z offset to the gyro_z_cal variable
     delay(3);                                                          //Delay 3us to have 250Hz for-loop
   }
+blba
 
   // divide by 1000 to get avarage offset
   gyro_x_cal /= 1000;                                                 
