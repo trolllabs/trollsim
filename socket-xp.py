@@ -1,15 +1,13 @@
 import socket, sys
 
 
-def udp_server(address):
-	print('UDP: Listening to %s %s' % address)
+def udp_server(udp_sock, address):
 	try:
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		print('Binding..')
-		sock.bind(address)
-		print('Ok')
+		udp_sock.bind(address)
+		print('UDP: Listening to %s %s' % address)
 		while True:
-			data, addr = sock.recvfrom(1024)
+			data, addr = udp_sock.recvfrom(1024)
 			print(data.hex().upper())
 	except socket.error as e:
 		sys.stderr.write('Socket Error: %s' % str(e))
@@ -21,7 +19,8 @@ def udp_server(address):
 		sys.exit(0)
 
 
-address = '0.0.0.0'
+ip = '0.0.0.0'
 port = 49000
 
-udp_server((address, port))
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+udp_server(sock, (ip, port))
