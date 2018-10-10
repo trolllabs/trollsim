@@ -36,9 +36,11 @@ def udp_client(udp_sock, address):
 		sleep(1)
 
 
-ip = '0.0.0.0'
+
+local_ip = '0.0.0.0'
+destination_ip = '10.24.11.21'
 port = 49000
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp_client(sock, ('localhost', port))
-#udp_server(sock, (ip, port))
+udp_client(sock, (destination_ip, port))
+#udp_server(sock, (local_ip, port))
