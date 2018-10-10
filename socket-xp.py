@@ -1,5 +1,9 @@
-import socket, sys
+import socket, sys, struct
+from time import sleep
 
+
+def float_to_hex(f):
+	return hex(struct.unpack('<I', struct.pack('<f', f))[0])
 
 def udp_server(udp_sock, address):
 	try:
@@ -19,8 +23,21 @@ def udp_server(udp_sock, address):
 		sys.exit(0)
 
 
+def udp_client(udp_sock, address):
+	header = 'DREF'
+	value = float_to_hex(3.0)
+	name = 'sim/test/test_float'
+	message = '%s\0%s%s' % (header, value, name)
+	message = '%e' % 3.0
+	while True:
+		print(message)
+		udp_sock.sendto(message.encode(), address)
+		sleep(1)
+
+
 ip = '0.0.0.0'
 port = 49000
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp_server(sock, (ip, port))
+udp_client(sock, ('localhost', port))
+#udp_server(sock, (ip, port))
