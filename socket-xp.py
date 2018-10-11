@@ -1,5 +1,4 @@
 import socket, sys, struct
-from time import sleep
 
 
 def null_terminate(s):
