@@ -36,14 +36,12 @@ def udp_server(udp_sock, address):
 
 def udp_client(udp_sock, address):
 	header = 'DREF'
-	value = 4.0
 	name = 'sim/test/test_float'
-	message = create_dref_packet(header, value, name)
-	print(message)
 	while True:
+		value = float(input('Set new value ~> '))
+		message = create_dref_packet(header, value, name)
 		udp_sock.sendto(message, address)
-		sleep(1)
-
+		print('send')
 
 
 local_ip = '0.0.0.0'
