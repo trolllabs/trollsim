@@ -11,9 +11,10 @@ def create_dref_packet(header, value, name):
 	name = null_terminate(name)
 	pad_length = 509 - (len(header) + 4 + len(name))
 	pad = '\0'*pad_length
-	packer = struct.Struct('%ds f %ds %ds' % (len(header), len(name), pad_length))
+	packer = struct.Struct('<%ds f %ds %ds' % (len(header), len(name), pad_length))
 	vals = (header.encode(), value, name.encode(), pad.encode())
 	return packer.pack(*vals)
+
 
 def udp_server(udp_sock, address):
 	try:
