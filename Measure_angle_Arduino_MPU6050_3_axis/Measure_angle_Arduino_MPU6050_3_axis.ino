@@ -112,8 +112,7 @@ void loop(){
   angle_roll_output_h = angle_roll_output_h * 0.9 + angle_roll_h * 0.1;   //Take 90% of the output roll value and add 10% of the raw roll value
   angle_pitch_output_h = angle_pitch_output_h * 0.9 + angle_pitch_h * 0.1*-1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
   //angle_yaw_output_h = angle_yaw_output_h * 0.9 + angle_yaw_h * 0.1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
-  Serial.print(" | roll_angle  = "); Serial.print(angle_roll_output_h);
-  Serial.print(" | pitch_angle  = "); Serial.print(angle_pitch_output_h);
+
   //Serial.print(" | Yaw angle  = "); Serial.println(angle_yaw_output_h);
   
   
@@ -160,7 +159,13 @@ void loop(){
   angle_roll_output_v = angle_roll_output_v * 0.9 + angle_roll_v * 0.1;   //Take 90% of the output roll value and add 10% of the raw roll value
   //angle_pitch_output_v = angle_pitch_output_v * 0.9 + angle_pitch_v * 0.1*-1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
   //angle_yaw_output_v = angle_yaw_output_v * 0.9 + angle_yaw_v * 0.1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
-  Serial.print(" | yaw_angle  = "); Serial.println(angle_roll_output_v);
+
+//  Serial.print(" | roll_angle  = "); Serial.print(angle_roll_output_h);
+//  Serial.print(" | pitch_angle  = "); Serial.print(angle_pitch_output_h);
+//  Serial.print(" | yaw_angle  = "); Serial.println(angle_roll_output_v);
+  Serial.print(angle_roll_output_h); Serial.print(' ');
+  Serial.print(angle_pitch_output_h); Serial.print(' ');
+  Serial.println(angle_roll_output_v);
   //Serial.print(" | pitch angle  = "); Serial.println(angle_pitch_output_v);
   //Serial.print(" | yaw angle  = "); Serial.println(angle_yaw_output_v);
   
