@@ -7,7 +7,7 @@ def null_terminate(s):
 
 
 def create_null_pad(pad_length):
-	return = ('\0'*pad_length).encode()
+	return ('\0'*pad_length).encode()
 
 
 def create_dref_packet(value, name):
