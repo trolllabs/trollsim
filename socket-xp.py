@@ -1,18 +1,23 @@
 import socket, sys, struct, logging, serial
+from time import sleep
 
 
 def null_terminate(s):
 	return s + '\0'
 
 
-def create_dref_packet(header, value, name):
-	header = null_terminate(header)
+def create_null_pad(pad_length):
+	return = ('\0'*pad_length).encode()
+
+
+def create_dref_packet(value, name):
+	header = null_terminate('DREF')
 	name = null_terminate(name)
 	pad_length = 509 - (len(header) + 4 + len(name))
-	pad = '\0'*pad_length
+	pad = create_null_pad(pad_length)
+
 	packer = struct.Struct('<%ds f %ds %ds' % (len(header), len(name), pad_length))
-	vals = (header.encode(), value, name.encode(), pad.encode())
-	return packer.pack(*vals)
+	return packer.pack(*(header.encode(), value, name.encode(), pad.encode()))
 
 
 def udp_server(udp_sock, address):
@@ -34,11 +39,10 @@ def udp_server(udp_sock, address):
 
 
 def udp_client(udp_sock, address):
-	header = 'DREF'
 	name = 'sim/test/test_float'
 	while True:
 		value = float(input('Set new value ~> '))
-		message = create_dref_packet(header, value, name)
+		message = create_dref_packet(value, name)
 		udp_sock.sendto(message, address)
 		print('send')
 
