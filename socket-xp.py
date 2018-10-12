@@ -38,6 +38,17 @@ def udp_server(udp_sock, address):
 		sys.exit(0)
 
 
+def read_arduino():
+	try:
+		msg = ser.readline().decode('utf-8').split()
+		msg = list(map(float, msg))
+		print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
+		return msg
+	except Exception as e:
+		sys.stderr.write(str(e))
+		logging.exception('Error when reading from serial')
+
+
 def udp_client(udp_sock, address):
 	name = 'sim/test/test_float'
 	while True:
@@ -56,15 +67,6 @@ def main():
 	local_ip = '0.0.0.0'
 	destination_ip = '10.24.11.21'
 	port = 49000
-
-	while True:
-		try:
-			msg = ser.readline().decode('utf-8').split()
-			msg = list(map(float, msg))
-			print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
-		except Exception as e:
-			sys.stderr.write(str(e))
-			logging.exception('Error when reading from serial')
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	udp_client(sock, (destination_ip, port))
