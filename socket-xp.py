@@ -1,4 +1,4 @@
-import socket, sys, struct
+import socket, sys, struct, logging, serial
 
 
 def null_terminate(s):
@@ -43,10 +43,30 @@ def udp_client(udp_sock, address):
 		print('send')
 
 
-local_ip = '0.0.0.0'
-destination_ip = '10.24.11.21'
-port = 49000
+def main():
+	#arg = sys.argv[1]
+	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
+	ser = serial.Serial('/dev/ttyUSB0', 115200)
+	error_logs = open('log.txt', 'a')
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp_client(sock, (destination_ip, port))
-#udp_server(sock, (local_ip, port))
+	local_ip = '0.0.0.0'
+	destination_ip = '10.24.11.21'
+	port = 49000
+
+	while True:
+		try:
+			msg = ser.readline().decode('utf-8').split()
+			msg = list(map(float, msg))
+			print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
+		except Exception as e:
+			sys.stderr.write(str(e))
+			logging.exception('Error when reading from serial')
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	udp_client(sock, (destination_ip, port))
+	#udp_server(sock, (local_ip, port))
+
+
+if __name__ == "__main__":
+	main()
+
