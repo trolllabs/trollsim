@@ -38,24 +38,29 @@ def udp_server(udp_sock, address):
 		sys.exit(0)
 
 
+names = {0: 'a', 1: 'b', 2: 'c'}
 def read_arduino():
 	try:
 		msg = ser.readline().decode('utf-8').split()
-		msg = list(map(float, msg))
+		#msg = list(map(float, msg))
 		print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
-		return msg
+		#return msg
+		for i, data in enumerate(msg):
+			yield create_dref_packet(data, names[i])
 	except Exception as e:
 		sys.stderr.write(str(e))
 		logging.exception('Error when reading from serial')
 
 
-def udp_client(udp_sock, address):
+def udp_client(udp_sock, address, message_generator):
 	name = 'sim/test/test_float'
 	while True:
 		value = float(input('Set new value ~> '))
-		message = create_dref_packet(value, name)
-		udp_sock.sendto(message, address)
-		print('send')
+		#message = create_dref_packet(value, name)
+		messages = message_generator()
+		for message in messages:
+			udp_sock.sendto(message, address)
+			print('send')
 
 
 def main():
@@ -69,7 +74,8 @@ def main():
 	port = 49000
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	udp_client(sock, (destination_ip, port))
+	udp_client(sock, (destination_ip, port), read_arduino)
+	#udp_client(sock, (destination_ip, port))
 	#udp_server(sock, (local_ip, port))
 
 
