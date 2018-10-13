@@ -24,8 +24,6 @@ def udp_client(udp_sock, address, message_generator):
 	for message in messages:
 		print(message.hex())
 		udp_sock.sendto(message, address)
-		print('send')
-
 
 
 class XPlaneDataAdapter:
