@@ -40,6 +40,15 @@ float angle_roll_output_v, angle_pitch_output_v, angle_yaw_output_v;
 long loop_timer_v;
 int temp_v;
 
+
+double fractionMap(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min)*(out_max - out_min)/(in_max - in_min) + out_min;
+}
+
+double remap(double value, double halfrange) {
+  return fractionMap(value, -1*halfrange, halfrange, -1, 1);
+}
+
 void setup() {
   Wire.begin();                                                        //Start I2C as master
   setup_mpu_6050_registers_h();                                          //Setup the registers of the horizontal MPU-6050 
@@ -163,9 +172,9 @@ void loop(){
 //  Serial.print(" | roll_angle  = "); Serial.print(angle_roll_output_h);
 //  Serial.print(" | pitch_angle  = "); Serial.print(angle_pitch_output_h);
 //  Serial.print(" | yaw_angle  = "); Serial.println(angle_roll_output_v);
-  Serial.print(angle_roll_output_h); Serial.print(' ');
-  Serial.print(angle_pitch_output_h); Serial.print(' ');
-  Serial.println(angle_roll_output_v);
+  Serial.print(remap(angle_roll_output_h, 60)); Serial.print(' ');
+  Serial.print(remap(angle_pitch_output_h, 60)); Serial.print(' ');
+  Serial.println(remap(angle_roll_output_v, 60));
   //Serial.print(" | pitch angle  = "); Serial.println(angle_pitch_output_v);
   //Serial.print(" | yaw angle  = "); Serial.println(angle_yaw_output_v);
   
