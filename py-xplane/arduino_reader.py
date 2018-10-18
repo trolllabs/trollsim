@@ -14,10 +14,10 @@ class ArduinoReader:
 				assert len(msg) == 3
 				yield list(map(float, msg))
 			except AssertionError as e:
-				sys.stderr.write(str(e))
+				sys.stderr.write('error: %s\n' % str(e))
 				logging.exception('ArduinoReader: Unclean reading from arduino')
 			except Exception as e:
-				sys.stderr.write(str(e))
+				sys.stderr.write('error: %s\n' % str(e))
 				logging.exception('ArduinoReader: Error when reading from serial')
 
 	def read(self):

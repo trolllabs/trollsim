@@ -48,7 +48,7 @@ class XPlaneDataAdapter:
 				for i, data in enumerate(reading):
 					yield self.create_dref_packet(data, 'f', self.dref_names[i])
 		except Exception as e:
-			sys.stderr.write(str(e))
+			sys.stderr.write('error: %s\n' % str(e))
 			logging.exception('XPlaneDataAdapter._packet_wrapper: \
 					Alignment between dref_names and actual reading')
 
