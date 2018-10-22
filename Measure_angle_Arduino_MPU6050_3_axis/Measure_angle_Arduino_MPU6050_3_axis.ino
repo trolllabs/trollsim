@@ -40,17 +40,9 @@ float angle_roll_output_v, angle_pitch_output_v, angle_yaw_output_v;
 long loop_timer_v;
 int temp_v;
 
-
-double fractionMap(double x, double in_min, double in_max, double out_min, double out_max) {
-  return (x - in_min)*(out_max - out_min)/(in_max - in_min) + out_min;
-}
-
-double remap(double value, double halfrange, bool invert) {
-  if (invert)
-    return fractionMap(value, halfrange, -halfrange, -1, 1);
-  else
-    return fractionMap(value, -halfrange, halfrange, -1, 1);
-}
+//Declaring some global variables for the flex sensor
+int flexSensorPin=0;
+float flexSensorValue=0;
 
 void setup() {
   Wire.begin();                                                        //Start I2C as master
@@ -67,8 +59,6 @@ void setup() {
     gyro_z_cal_v += gyro_z_v;                                              //Add the gyro z offset to the gyro_z_cal variable
     delay(3);                                                          //Delay 3us to have 250Hz for-loop
   }
-
-
   // divide by 1000 to get avarage offset
   gyro_x_cal_h /= 1000;                                                 
   gyro_y_cal_h /= 1000;                                                 
@@ -102,31 +92,23 @@ void loop(){
   //57.296 = 1 / (3.142 / 180) The Arduino asin function is in radians
   angle_pitch_acc_h = asin((float)acc_x_h/acc_total_vector_h)* -57.296;       //Calculate the pitch angle
   angle_roll_acc_h = asin((float)acc_y_h/acc_total_vector_h)* 57.296;       //Calculate the roll angle
-  //angle_yaw_acc_h = asin((float)acc_z_h/acc_total_vector_h)* -57.296;       //Calculate the yaw angle
-  
+
   angle_roll_acc_h -= 0.0;                                              //Accelerometer calibration value for roll
   angle_pitch_acc_h -= 0.0;                                               //Accelerometer calibration value for pitch
-  //angle_yaw_acc_h -= 0.0;                                                //Accelerometer calibration value for yaw
 
   if(set_gyro_angles_h){                                                 //If the IMU is already started
     angle_roll_h = angle_roll_h * 0.9996 + angle_roll_acc_h * 0.0004;     //Correct the drift of the gyro roll angle with the accelerometer roll angle
     angle_pitch_h = angle_pitch_h * 0.9996 + angle_pitch_acc_h * 0.0004;        //Correct the drift of the gyro pitch angle with the accelerometer pitch angle
-    //angle_yaw_h = angle_yaw_h * 0.9996 + angle_yaw_acc_h * 0.0004;           //Correct the drift of the gyro yaw angle with the accelerometer yaw angle
   }
   else{                                                                //At first start
     angle_roll_h = angle_roll_acc_h;                                     //Set the gyro roll angle equal to the accelerometer roll angle 
     angle_pitch_h = angle_pitch_acc_h;                                       //Set the gyro pitch angle equal to the accelerometer pitch angle
-    //angle_yaw_h = angle_yaw_acc_h;                                         //Set the gyro yaw angle equal to the accelerometer yaw angle 
     set_gyro_angles_h = true;                                            //Set the IMU started flag
   }
   
   //To dampen the roll and pitch angles a complementary filter is used
   angle_roll_output_h = angle_roll_output_h * 0.9 + angle_roll_h * 0.1;   //Take 90% of the output roll value and add 10% of the raw roll value
-  angle_pitch_output_h = angle_pitch_output_h * 0.9 + angle_pitch_h * 0.1*-1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
-  //angle_yaw_output_h = angle_yaw_output_h * 0.9 + angle_yaw_h * 0.1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
-
-  //Serial.print(" | Yaw angle  = "); Serial.println(angle_yaw_output_h);
-  
+  angle_pitch_output_h = angle_pitch_output_h * 0.9 + angle_pitch_h * 0.1*-1;      //Take 90% of the output pitch value and add 10% of the raw pitch value  
   
  //Vertical sensor from here and down
  
@@ -172,14 +154,22 @@ void loop(){
   //angle_pitch_output_v = angle_pitch_output_v * 0.9 + angle_pitch_v * 0.1*-1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
   //angle_yaw_output_v = angle_yaw_output_v * 0.9 + angle_yaw_v * 0.1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
 
-//  Serial.print(" | roll_angle  = "); Serial.print(angle_roll_output_h);
-//  Serial.print(" | pitch_angle  = "); Serial.print(angle_pitch_output_h);
-//  Serial.print(" | yaw_angle  = "); Serial.println(angle_roll_output_v);
+// read and print value of flex sensor
+flexSensorValue=(fractionMap(analogRead(flexSensorPin),40,105,1,0)); //read value of flex sensor
+if(flexSensorValue>1){
+  Serial.print(1.0);
+}
+else if(flexSensorValue<0.1){
+  Serial.print(0.0);
+}
+else Serial.print(flexSensorValue);
+
+Serial.print(' ');
+
+
   Serial.print(remap(angle_roll_output_h, 60, false)); Serial.print(' ');
   Serial.print(remap(angle_pitch_output_h, 60, false)); Serial.print(' ');
   Serial.println(remap(angle_roll_output_v, 60, true));
-  //Serial.print(" | pitch angle  = "); Serial.println(angle_pitch_output_v);
-  //Serial.print(" | yaw angle  = "); Serial.println(angle_yaw_output_v);
   
 while(micros() - loop_timer_h < 4000);                                 //Wait until the loop_timer reaches 4000us (250Hz) before starting the next loop
  loop_timer_h = micros();//Reset the loop timer
@@ -187,9 +177,6 @@ while(micros() - loop_timer_h < 4000);                                 //Wait un
  
  
 }
-
-
-
 
 void setup_mpu_6050_registers_h(){
   //Activate the horisontal MPU-6050
@@ -257,7 +244,16 @@ void read_mpu_6050_data_v(){                                             //Subro
   gyro_z_v = Wire.read()<<8|Wire.read();                                 
 }
 
+double fractionMap(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min)*(out_max - out_min)/(in_max - in_min) + out_min;
+}
 
+double remap(double value, double halfrange, bool invert) {
+  if (invert)
+    return fractionMap(value, halfrange, -halfrange, -1, 1);
+  else
+    return fractionMap(value, -halfrange, halfrange, -1, 1);
+}
 
 
 
