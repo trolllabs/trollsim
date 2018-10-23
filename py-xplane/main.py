@@ -1,7 +1,7 @@
 import socket, sys
-from arduino_reader import ArduinoReader
-from networking import XPlaneDataAdapter, udp_client, udp_server
-from xp_vars import *
+from xplane.arduino_reader import ArduinoReader
+from xplane.networking import XPlaneDataAdapter, udp_client, udp_server
+from xplane.xp_vars import *
 
 
 def main():
