@@ -4,28 +4,15 @@
 <input id="text" /><button>Send</button>
 </form>
 <script>
-	const recvsocket = new WebSocket('ws://localhost:8001');
-	const sendsocket = new WebSocket('ws://localhost:8002');
-	//const recvsocket = new WebSocket('ws://129.241.90.236:8005');
-	//const recvsocket = new WebSocket('ws://10.22.21.13:8004');
+	const sock = new WebSocket('ws://localhost:8001');
 	const logger = document.getElementById('log');
 
-	recvsocket.addEventListener('open', function(event) {
+	sock.addEventListener('open', function(event) {
 	});
 
-	recvsocket.addEventListener('message', function(event) {
+	sock.addEventListener('message', function(event) {
 		logger.innerHTML = event.data + "\n";
-		recvsocket.send(event.data)
-		sendsocket.send(event.data)
+		sock.send(event.data)
 	});
 
-	//socket.onmessage = function (event) {
-	//	logger.inerHTML += event.data + "\n";
-	//}
-
-	//function sendMessage() {
-	//	msg = document.getElementById('text').value;
-	//	console.log('send! ' + msg);
-	//	sendsocket.send(msg);
-	//}
 </script>
