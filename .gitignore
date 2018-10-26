@@ -1,2 +1,5 @@
 log.txt
 .idea/*
+bin
+include
+lib
