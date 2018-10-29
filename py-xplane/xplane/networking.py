@@ -28,14 +28,27 @@ def udp_client(udp_sock, address, message_generator):
 
 class XPlaneConnector:
 	def __init__(self):
+		self.data_multipliers = {0: 0, 1: 0, 2: 0, 3: 0}
 		self.packet_wrapper = XPlaneDataAdapter()
+
+	def frontend_handler(self, value):
+		try:
+			data = value.strip().split()
+			assert len(data) == 2
+			self.data_multipliers[int(data[0])] = float(data[1])
+			print(self.data_multipliers)
+		except AssertionError:
+			error_msg = 'XPlaneConnector: Too many values, %d' % len(data)
+			sys.stderr.write(error_msg)
+			logging.exception(error_msg)
 
 	def _packet_wrapper(self):
 		try:
 			for reading in self.data_reading():
 				for i, data in enumerate(reading):
+					processed_data = data*self.data_multipliers[i]
 					yield self.packet_wrapper.create_dref_packet(
-							data,
+							processed_data,
 							'f',
 							self.dref_names[i]
 							)
