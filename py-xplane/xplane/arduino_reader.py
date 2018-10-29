@@ -13,9 +13,10 @@ class ArduinoReader:
 				#print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
 				assert len(msg) == 4
 				yield list(map(float, msg))
-			except AssertionError as e:
-				sys.stderr.write('error: %s\n' % str(e))
-				logging.exception('ArduinoReader: Unclean reading from arduino')
+			except AssertionError:
+				error_msg = 'ArduinoReader: Unclean reading from arduino, %d' % len(msg)
+				sys.stderr.write(error_msg)
+				logging.exception(error_msg)
 			except Exception as e:
 				sys.stderr.write('error: %s\n' % str(e))
 				logging.exception('ArduinoReader: Error when reading from serial')
