@@ -26,6 +26,30 @@ def udp_client(udp_sock, address, message_generator):
 		udp_sock.sendto(message, address)
 
 
+class XPlaneConnector:
+	def __init__(self):
+		self.packet_wrapper = XPlaneDataAdapter()
+
+	def _packet_wrapper(self):
+		try:
+			for reading in self.data_reading():
+				for i, data in enumerate(reading):
+					yield self.packet_wrapper.create_dref_packet(
+							data,
+							'f',
+							self.dref_names[i]
+							)
+		except Exception as e:
+			sys.stderr.write('XPlaneConnector error: %s\n' % str(e))
+			logging.exception('XPlaneDataAdapter._packet_wrapper: \
+					Alignment between dref_names and actual reading')
+
+	def wrap(self, data_reading, expected_reading):
+		self.data_reading = data_reading
+		self.dref_names = expected_reading
+		return self._packet_wrapper
+
+
 class XPlaneDataAdapter:
 	def _null_terminate(self, s):
 		return s + '\0'
@@ -42,18 +66,4 @@ class XPlaneDataAdapter:
 		packer = struct.Struct('<%ds %s %ds %ds' % (len(header), dtype, len(name), pad_length))
 		return packer.pack(*(header.encode(), value, name.encode(), pad))
 
-	def _packet_wrapper(self):
-		try:
-			for reading in self.data_reading():
-				for i, data in enumerate(reading):
-					yield self.create_dref_packet(data, 'f', self.dref_names[i])
-		except Exception as e:
-			sys.stderr.write('error: %s\n' % str(e))
-			logging.exception('XPlaneDataAdapter._packet_wrapper: \
-					Alignment between dref_names and actual reading')
-
-	def wrap(self, data_reading, expected_reading):
-		self.data_reading = data_reading
-		self.dref_names = expected_reading
-		return self._packet_wrapper
 
