@@ -1,18 +1,127 @@
 <!DOCTYPE HTML>
-<pre id="log"></pre>
-<form onsubmit="sendMessage();return false;">
-<input id="text" /><button>Send</button>
-</form>
+
 <script>
-	const sock = new WebSocket('ws://localhost:8001');
+	const sock = new WebSocket('ws://' + window.location.hostname + ':8000');
+</script>
+
+<!-- Imported CDN --!>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+<link href="css/range.css" rel="stylesheet" type="text/css" />
+<script src="js/range.js"></script>
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+
+<div class="ui internally celled centered grid">
+	<div class="row">
+		<div class="segment">
+			<pre id="log"></pre>
+			<form onsubmit="sendMessage();return false;">
+				<input id="text" /><button>Send</button>
+			</form>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="three wide column">
+			<div class="ui blue range" id="slider0"></div>
+		</div>
+		<div class="one wide column">
+			<div class="ui input">
+				<input type="text" id="sliderinput0">
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="three wide column">
+			<div class="ui blue range" id="slider1"></div>
+		</div>
+		<div class="one wide column">
+			<div class="ui input">
+				<input type="text" id="sliderinput1">
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="three wide column">
+			<div class="ui blue range" id="slider2"></div>
+		</div>
+		<div class="one wide column">
+			<div class="ui input">
+				<input type="text" id="sliderinput2">
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="three wide column">
+			<div class="ui blue range" id="slider3"></div>
+		</div>
+		<div class="one wide column">
+			<div class="ui input">
+				<input type="text" id="sliderinput3">
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
 	const logger = document.getElementById('log');
-
-	sock.addEventListener('open', function(event) {
-	});
-
 	sock.addEventListener('message', function(event) {
 		logger.innerHTML = event.data + "\n";
 		sock.send(event.data)
 	});
 
+	function sendMessage() {
+		sock.send(document.getElementById('text').value);
+	}
+
+
+	function sendSliderValue(id) {
+		return function (value, meta) {
+			if (meta.triggeredByUser) {
+				sock.send(id + ' ' + value);
+			}
+		}
+	}
+
+	$(document).ready(function() {
+		$('#slider0').range({
+			min: 0.0,
+			max: 2,
+			start: 1,
+			step: 0.01,
+			input: '#sliderinput0',
+			onChange: sendSliderValue(0)
+		});
+		$('#slider1').range({
+			min: 0.0,
+			max: 2,
+			start: 1,
+			step: 0.01,
+			input: '#sliderinput1',
+			onChange: sendSliderValue(1)
+		});
+		$('#slider2').range({
+			min: 0.0,
+			max: 2,
+			start: 1,
+			step: 0.01,
+			input: '#sliderinput2',
+			onChange: sendSliderValue(2)
+		});
+		$('#slider3').range({
+			min: 0.0,
+			max: 2,
+			start: 1,
+			step: 0.01,
+			input: '#sliderinput3',
+			onChange: sendSliderValue(3)
+		});
+
+	});
 </script>
