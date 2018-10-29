@@ -73,7 +73,6 @@
 	const logger = document.getElementById('log');
 	sock.addEventListener('message', function(event) {
 		logger.innerHTML = event.data + "\n";
-		sock.send(event.data)
 	});
 
 	function sendMessage() {
