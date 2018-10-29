@@ -11,7 +11,7 @@ class ArduinoReader:
 			try:
 				msg = self.arduino_unit.readline().decode('utf-8').split()
 				#print('roll: %s, pitch: %s, yaw: %s' % (msg[0], msg[1], msg[2]))
-				assert len(msg) == 3
+				assert len(msg) == 4
 				yield list(map(float, msg))
 			except AssertionError as e:
 				sys.stderr.write('error: %s\n' % str(e))
