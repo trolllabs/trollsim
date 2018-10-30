@@ -28,7 +28,7 @@ def udp_client(udp_sock, address, message_generator):
 
 class XPlaneConnector:
 	def __init__(self):
-		self.data_multipliers = {0: 0, 1: 0, 2: 0, 3: 0}
+		self.data_multipliers = {}
 		self.packet_wrapper = XPlaneDataAdapter()
 
 	def frontend_handler(self, value):
@@ -45,7 +45,7 @@ class XPlaneConnector:
 		try:
 			for reading in self.data_reading():
 				for i, data in enumerate(reading):
-					processed_data = data*self.data_multipliers[i]
+					processed_data = data*self.data_multipliers.get(i, 1)
 					yield self.packet_wrapper.create_dref_packet(
 							processed_data,
 							'f',
