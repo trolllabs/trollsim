@@ -32,7 +32,7 @@ class FrontendSocket:
 			sys.stderr.write('Exception: %s\n' % str(e))
 		finally:
 			self.sock.close()
-			print('Socket closed')
+			print('Frontend socket closed')
 
 	def run(self):
 		start_new_thread(self.connect_frontend, ())

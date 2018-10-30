@@ -22,7 +22,7 @@ def udp_server(udp_sock, address):
 def udp_client(udp_sock, address, message_generator):
 	messages = message_generator()
 	for message in messages:
-		print(message.hex())
+		#print(message.hex())
 		udp_sock.sendto(message, address)
 
 
@@ -36,7 +36,6 @@ class XPlaneConnector:
 			data = value.strip().split()
 			assert len(data) == 2
 			self.data_multipliers[int(data[0])] = float(data[1])
-			print(self.data_multipliers)
 		except AssertionError:
 			error_msg = 'XPlaneConnector: Too many values, %d\n' % len(data)
 			sys.stderr.write(error_msg)
