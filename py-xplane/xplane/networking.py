@@ -10,9 +10,9 @@ def udp_server(udp_sock, address):
 			data, addr = udp_sock.recvfrom(1024)
 			print(data.hex().upper())
 	except socket.error as e:
-		sys.stderr.write('Socket Error: %s' % str(e))
+		sys.stderr.write('Socket Error: %s\n' % str(e))
 	except Exception as e:
-		sys.stderr.write('Error: %s' % str(e))
+		sys.stderr.write('Error: %s\n' % str(e))
 	finally:
 		sock.close()
 		print('Socket closed')
@@ -38,7 +38,7 @@ class XPlaneConnector:
 			self.data_multipliers[int(data[0])] = float(data[1])
 			print(self.data_multipliers)
 		except AssertionError:
-			error_msg = 'XPlaneConnector: Too many values, %d' % len(data)
+			error_msg = 'XPlaneConnector: Too many values, %d\n' % len(data)
 			sys.stderr.write(error_msg)
 			logging.exception(error_msg)
 

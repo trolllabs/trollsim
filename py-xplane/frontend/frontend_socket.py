@@ -27,9 +27,9 @@ class FrontendSocket:
 				conn.send(str(random.random()).encode('utf-8'))
 				sleep(0.2)
 		except socket.error as e:
-			sys.stderr.write('Connection failed: %s' % str(e))
+			sys.stderr.write('Connection failed: %s\n' % str(e))
 		except Exception as e:
-			sys.stderr.write('Exception: %s' % str(e))
+			sys.stderr.write('Exception: %s\n' % str(e))
 		finally:
 			self.sock.close()
 			print('Socket closed')
