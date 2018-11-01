@@ -19,23 +19,11 @@ http.listen(port, function() {
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ server: http });
 
-var net = require('net');
-var socket_client = new net.Socket();
-socket_client.connect(8005, 'localhost', function() {
-	console.log('Backend connected.');
-	socket_client.setEncoding('utf-8');
-});
+var tcp_client = require('./tcp_client')
+var socket_client = tcp_client.connect('localhost', 8005);
 
 wss.on('connection', function connection(ws) {
 	console.log('Number of clients: ' + wss.clients.size);
-	socket_client.on('data', function(data) {
-		//console.log(data);
-		wss.clients.forEach(function each(client) {
-			if (client.readyState == WebSocket.OPEN) {
-				client.send(data);
-			}
-		});
-	});
 
 	ws.on('message', function incoming(message) {
 		socket_client.write(message);
@@ -47,4 +35,15 @@ wss.on('connection', function connection(ws) {
 wss.on('close', function close() {
 	console.log('A client disconnected.');
 });
+
+function getSocketData(message) {
+	wss.clients.forEach(function each(client) {
+		if (client.readyState == WebSocket.OPEN) {
+			client.send(message);
+		}
+	});
+
+}
+
+tcp_client.setHandler(getSocketData);
 
