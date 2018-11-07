@@ -1,7 +1,8 @@
 import socket, sys
 from frontend.frontend_socket import FrontendSocket
 from xplane.arduino_reader import ArduinoReader
-from xplane.networking import XPlaneConnector, udp_client, udp_server
+from xplane.networking import udp_client, udp_server
+from xplane.xplane_processor import XPlaneConnector
 from xplane.xp_vars import *
 from _thread import start_new_thread
 
