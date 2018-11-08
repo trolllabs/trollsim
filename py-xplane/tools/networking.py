@@ -19,9 +19,16 @@ def udp_server(udp_sock, address):
 		sys.exit(0)
 
 
-def udp_client(udp_sock, address, message_generator):
-	messages = message_generator()
-	for message in messages:
-		#print(message.hex())
-		udp_sock.sendto(message, address)
+class UDPClient:
+	def __init__(self, host, port):
+		self.address = (host, port)
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	def send(self, message):
+		self.sock.sendto(message, self.address)
+
+	def read(self):
+		while True:
+			data = self.sock.recv(1024)
+			yield data
 
