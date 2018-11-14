@@ -1,6 +1,6 @@
 import socket, sys
 from frontend.frontend_socket import FrontendSocket
-from data_readers.arduino_reader import ArduinoReader
+from readers import ArduinoReader
 from tools.networking import udp_server, UDPClient
 from tools.xplane_variables import *
 from data_processors.xplane_processor import XPlaneConnector
