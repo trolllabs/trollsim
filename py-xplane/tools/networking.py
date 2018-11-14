@@ -1,4 +1,5 @@
 import socket, sys
+import threading
 
 
 def udp_server(udp_sock, address):
@@ -21,11 +22,13 @@ def udp_server(udp_sock, address):
 
 class UDPClient:
 	def __init__(self, host, port):
+		self.lock = threading.Lock()
 		self.address = (host, port)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def send(self, message):
-		self.sock.sendto(message, self.address)
+		with self.lock:
+			self.sock.sendto(message, self.address)
 
 	def read(self):
 		while True:
@@ -38,6 +41,7 @@ class TCPServer:
 	Accepts only one connection
 	'''
 	def __init__(self, host, port):
+		self.lock = threading.Lock()
 		self.address = (host, port)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,7 +51,8 @@ class TCPServer:
 		self.conn, self.addr = self.sock.accept()
 
 	def send(self, message):
-		self.conn.send(message.encode('utf-8'))
+		with self.lock:
+			self.conn.send(message.encode('utf-8'))
 
 	def read(self):
 		while True:
