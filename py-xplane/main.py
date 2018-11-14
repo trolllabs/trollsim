@@ -1,4 +1,4 @@
-import socket, sys
+import socket, sys, logging
 from frontend.frontend_socket import FrontendSocket
 from readers import ArduinoReader
 from tools.networking import udp_server, UDPClient
@@ -9,6 +9,7 @@ from _thread import start_new_thread
 
 def main():
 	local_ip = '0.0.0.0'
+	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
 	xplane_ip = '10.53.25.98'
 	xplane_port = 49000
 	arduino_ports = ['/dev/ttyUSB1', '/dev/ttyUSB2']

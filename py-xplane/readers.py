@@ -3,7 +3,6 @@ import sys, serial, logging
 
 class ArduinoReader:
 	def __init__(self, arduino_ports, baudrate):
-		logging.basicConfig(level=logging.DEBUG, filename='log.txt')
 		self.baudrate = baudrate
 		self.arduino_ports = arduino_ports
 
