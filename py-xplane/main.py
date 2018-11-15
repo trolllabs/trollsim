@@ -1,6 +1,6 @@
 import sys, logging, threading
 from readers import ArduinoReader, SocketReader
-from tools.networking import udp_server, UDPClient, TCPServer
+from networking import udp_server, UDPClient, TCPServer
 from processors import GloveMultiplier, FrontendSocket
 
 
