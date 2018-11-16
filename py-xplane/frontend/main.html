@@ -3,6 +3,8 @@
 <script>
 	const sock = new WebSocket('ws://' + window.location.hostname + ':8000');
 </script>
+<link rel="stylesheet" href="chartist-js/dist/chartist.min.css">
+<script src="chartist-js/dist/chartist.min.js"></script>
 
 <!-- Imported CDN --!>
 <script
@@ -17,6 +19,24 @@
 <link href="css/style.css" rel="stylesheet" type="text/css" />
 
 <div class="ui internally celled centered grid">
+
+	<div class="row">
+		<div style="display:margin-left:auto;margin-right:auto;display:inline-block;width:30%">
+			<div class="ct-chart ct-minor-seventh" id="chart1"></div>
+		</div>
+		<div style="display:margin-left:auto;margin-right:auto;display:inline-block;width:30%">
+			<div class="ct-chart ct-minor-seventh" id="chart2"></div>
+		</div>
+		<div style="display:margin-left:auto;margin-right:auto;display:inline-block;width:30%">
+			<div class="ct-chart ct-minor-seventh" id="chart3"></div>
+		</div>
+		<div style="display:margin-left:auto;margin-right:auto;display:inline-block;width:30%">
+			<div class="ct-chart ct-minor-seventh" id="chart4"></div>
+		</div>
+	</div>
+
+
+
 	<div class="row">
 		<div class="segment">
 			<pre id="log"></pre>
