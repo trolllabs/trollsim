@@ -36,23 +36,6 @@ class ArduinoReader:
 	def __call__(self):
 		start_new_thread(self._run, ())
 
-	def read(self):
-		for port in self.arduino_ports:
-			try:
-				print('Trying %s..' % port)
-				self.arduino_unit = serial.Serial(port, self.baudrate)
-				print('Starting to read from %s' % port)
-				while True:
-					try:
-						reading = self.arduino_unit.readline().decode('utf-8')
-						yield reading
-					except UnicodeDecodeError as e:
-						sys.stderr.write('Decode error at ArduinoReader: %s\n' % str(e))
-			except serial.serialutil.SerialException as e:
-				sys.stderr.write('ArduinoReader error: %s\n' % str(e))
-				logging.exception('ArduinoReader: Did not find port %s\n' % port)
-		raise ConnectionError('Could not find arduino on specified ports')
-
 
 class SocketReader:
 	def __init__(self, socket_read):
