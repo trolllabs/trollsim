@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<script>
+	const sock = new WebSocket('ws://' + window.location.hostname + ':8000');
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+<script src="epoch-0.8.4/dist/js/epoch.min.js"></script>
+<link rel="stylesheet" type="test/css" href="epoch-0.8.4/dist/css/epoch.min.css">
+
+
+<div id="chart1" style="width: 800px; height: 500px"></div>
+
+
+<script>
+	var data0 = [{
+		label: "Series 1",
+		values: [{time: Date.now() - 1, y: 5}, {time: Date.now(), y: 4}]
+	}];
+
+	var line1 = $('#chart1').epoch({
+		type: 'time.line',
+		data: data0
+	});
+
+	function changeData(e) {
+		sensor_data = e.data.trim().split(' ');
+		new_data = {time: Date.now(), y: sensor_data[0]};
+		//line1.push(new_data);
+	}
+
+	sock.addEventListener('message', changeData);
+</script>
+

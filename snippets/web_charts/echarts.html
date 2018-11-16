@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<script>
+	const sock = new WebSocket('ws://' + window.location.hostname + ':8000');
+</script>
+<script src="incubator-echarts/dist/echarts.js"></script>
+
+
+<div id="chart1" style="width: 800px; height: 500px"></div>
+
+
+<script>
+	var chart1 = echarts.init(document.getElementById('chart1'));
+	var time_start = Date.now();
+	const datapoints = 50;
+
+	var chart1_option = {
+		animation: true,
+		xAxis: [{
+			type: 'category',
+			boundaryGap: true,
+			data: new Array(datapoints).fill(0)
+		}],
+		yAxis: [{
+			type: 'value',
+			scale: true
+		}],
+		series: [{
+			data: new Array(datapoints).fill(1),
+			type: 'line',
+			symbolSize: 10
+		}]
+	}
+
+	chart1.setOption(chart1_option);
+
+	var counter = 0;
+	function changeData(e) {
+		counter++;
+		sensor_data = e.data.trim().split(' ');
+		chart1_option.series[0].data.shift();
+		chart1_option.series[0].data.push(sensor_data[0]);
+		chart1_option.xAxis[0].data.shift();
+		chart1_option.xAxis[0].data.push(Date.now() - time_start);
+		chart1.setOption(chart1_option);
+	}
+	sock.addEventListener('message', changeData);
+</script>
+
