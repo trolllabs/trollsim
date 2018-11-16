@@ -9,6 +9,10 @@ app.get('/', function(req, res) {
 	res.sendFile('main.html', {root: __dirname});
 });
 
+app.get('/test', function(req, res) {
+	res.sendFile('test.html', {root: __dirname});
+});
+
 http.listen(port, function() {
 	console.log('Web server listening to port ' + port);
 });
