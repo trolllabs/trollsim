@@ -26,14 +26,14 @@ def main():
 	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_socket.send)
 	frontend = FrontendSocket(
 			glove_processor.frontend_handler,
-			frontend_socket.send,
 			frontend_reader,
-			glove_reader)
+			glove_reader,
+			frontend_socket.send)
 
+	glove_reader()
+	ehealth_reader()
 	frontend_reader()
 	xplane_reader()
-	ehealth_reader()
-	glove_reader()
 
 
 	# Very temporary solution
