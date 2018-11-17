@@ -1,4 +1,4 @@
-import socket, sys
+import socket, sys, serial
 import threading
 
 
@@ -63,4 +63,36 @@ class TCPServer:
 	def close(self):
 		self.sock.close()
 		print('TCP Server closed.')
+
+
+class Arduino:
+	def __init__(self, serial_number, baudrate):
+		from serial.tools import list_ports
+		self.lock = threading.Lock()
+		try:
+			print('Looking up arduino with serial number %s..' % serial_number)
+			arduino_port = next(list_ports.grep(serial_number))
+			print('Found hwid: %s' % arduino_port.hwid)
+			self.serial_io = serial.Serial(arduino_port.device, baudrate)
+		except StopIteration:
+			sys.stderr.write('Arduino: Could not find serial number. Is it correct?\n')
+			raise Exception # Crash and burn for now
+		except serial.serialutil.SerialExcepion as e:
+			error_msg = 'Arduino error: %s\n' % str(e)
+			sys.stderr.write(error_msg)
+			logging.exception(error_msg)
+			raise Exception # Crash and burn for now
+
+	def send(self, message):
+		with self.lock:
+			self.serial_io.write(message.encode('utf-8'))
+
+	def read(self):
+		while True:
+			try:
+				reading = self.serial_io.readline().decode('utf-8')
+				if reading:
+					yield reading
+			except UnicodeDecodeError as e:
+				sys.stderr.write('Decode error at Arduino: %s\n' % str(e))
 
