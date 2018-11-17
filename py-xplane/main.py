@@ -13,7 +13,8 @@ def main():
 	glove_sn = 'AH03J54W'
 	ehealth_sn = '7533832353535140E1C2'
 
-	xplane_socket = UDPClient(xplane_ip, xplane_port)
+	xplane_writesocket = UDPClient(xplane_ip, xplane_port)
+	xplane_readsocket = UDPServer('0.0.0.0', xplane_port)
 	frontend_socket = TCPServer(frontend_ip, frontend_port)
 	glove_arduino = Arduino(glove_sn, 115200)
 	ehealth_arduino = Arduino(ehealth_sn, 115200)
@@ -21,9 +22,9 @@ def main():
 	glove_reader = ArduinoReader(glove_arduino.read)
 	ehealth_reader = ArduinoReader(ehealth_arduino.read)
 	frontend_reader = SocketReader(frontend_socket.read)
-	xplane_reader = SocketReader(xplane_socket.read)
+	xplane_reader = SocketReader(xplane_readsocket.read)
 
-	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_socket.send)
+	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_writesocket.send)
 	frontend = FrontendSocket(
 			glove_processor.frontend_handler,
 			frontend_reader,

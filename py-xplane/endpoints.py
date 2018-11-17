@@ -36,6 +36,26 @@ class UDPClient:
 			yield data
 
 
+class UDPServer:
+	def __init__(self, host, port):
+		self.lock = threading.Lock()
+		self.address = (host, port)
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		print('UDP server listening at %s %s' % self.address)
+		self.sock.bind(self.address)
+
+	def send(self, message, addr):
+		with self.lock:
+			self.sock.sendto(message, addr)
+
+	def read(self):
+		while True:
+			data, addr = self.sock.recvfrom(509)
+			yield data
+
+
+
 class TCPServer:
 	'''
 	Accepts only one connection
