@@ -23,9 +23,9 @@ class ArduinoReader:
 
 
 class SocketReader:
-	def __init__(self, socket_read):
+	def __init__(self, socket_reader):
 		self.listeners = []
-		self.reader = socket_read
+		self.reader = socket_reader
 
 	def add_listener(self, listener):
 		self.listeners.append(listener)
