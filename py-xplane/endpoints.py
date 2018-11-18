@@ -53,7 +53,7 @@ class TCPServer:
 
 	def send(self, message):
 		with self.lock:
-			self.conn.send(message.encode('utf-8'))
+			self.conn.send(message)
 
 	def read(self):
 		while True:
