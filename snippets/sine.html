@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<pre>sine wave</pre>
+<pre id="log"></pre>
+<script>
+	const socket = new WebSocket('ws://localhost:8000');
+	const logger = document.getElementById('log');
+
+	socket.addEventListener('open', function(event) {
+		logger.innerHTML = "connected";
+	});
+
+	function sendMessage(message) {
+		socket.send(message);
+		return false;
+	};
+
+	function sineValues(x) {
+		return Math.sin(.1*x*Math.PI);
+	}
+
+	var counter = 0;
+	setInterval(function(){
+		sendMessage(sineValues(counter));
+		counter++;
+	}, 30);
+</script>

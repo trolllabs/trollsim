@@ -3,7 +3,7 @@ from _thread import start_new_thread
 
 
 class GloveMultiplier:
-	def __init__(self, data_output, glove_reader, frontend_reader):
+	def __init__(self, glove_reader, frontend_reader, data_output):
 		from xplane_tools import expected_reading, XPlaneDataAdapter
 		self.data_multipliers = {}
 		self.packet_wrapper = XPlaneDataAdapter()
@@ -40,7 +40,7 @@ class GloveMultiplier:
 
 
 class FrontendSocket:
-	def __init__(self, handler, data_output, socket_reader, ehealth_reader):
+	def __init__(self, handler, socket_reader, ehealth_reader, data_output):
 		self.data_output = data_output
 		self.data_handler = handler
 		socket_reader.add_listener(self.frontend_receiver)

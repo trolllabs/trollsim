@@ -1,7 +1,7 @@
 import sys, logging, threading
 from readers import ArduinoReader, SocketReader
-from tools.networking import udp_server, UDPClient, TCPServer
 from processors import GloveMultiplier, FrontendSocket
+from endpoints import UDPClient, UDPServer, TCPServer, Arduino
 
 
 def main():
@@ -10,28 +10,31 @@ def main():
 	xplane_port = 49000
 	frontend_ip = 'localhost'
 	frontend_port = 8005
-	glove_ports = ['/dev/ttyUSB1', '/dev/ttyUSB2']
-	ehealth_ports = ['/dev/ttyACM0']
+	glove_sn = 'AH03J54W'
+	ehealth_sn = '7533832353535140E1C2'
 
-	xplane_socket = UDPClient(xplane_ip, xplane_port)
+	xplane_writesocket = UDPClient(xplane_ip, xplane_port)
+	xplane_readsocket = UDPServer('0.0.0.0', xplane_port)
 	frontend_socket = TCPServer(frontend_ip, frontend_port)
+	glove_arduino = Arduino(glove_sn, 115200)
+	ehealth_arduino = Arduino(ehealth_sn, 115200)
 
-	ehealth_reader = ArduinoReader(ehealth_ports, 115200)
-	glove_reader = ArduinoReader(glove_ports, 115200)
+	glove_reader = ArduinoReader(glove_arduino.read)
+	ehealth_reader = ArduinoReader(ehealth_arduino.read)
 	frontend_reader = SocketReader(frontend_socket.read)
-	xplane_reader = SocketReader(xplane_socket.read)
+	xplane_reader = SocketReader(xplane_readsocket.read)
 
-	glove_processor = GloveMultiplier(xplane_socket.send, glove_reader, frontend_reader)
+	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_writesocket.send)
 	frontend = FrontendSocket(
 			glove_processor.frontend_handler,
-			frontend_socket.send,
 			frontend_reader,
-			glove_reader)
+			glove_reader,
+			frontend_socket.send)
 
+	glove_reader()
+	ehealth_reader()
 	frontend_reader()
 	xplane_reader()
-	ehealth_reader()
-	glove_reader()
 
 
 	# Very temporary solution
