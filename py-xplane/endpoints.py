@@ -1,5 +1,5 @@
-import socket, sys, serial
-import threading
+import socket, sys, serial, threading
+from _thread import start_new_thread
 
 
 def udp_server(udp_sock, address):
@@ -104,14 +104,36 @@ class Arduino:
 
 	def send(self, message):
 		with self.lock:
-			self.serial_io.write(message.encode('utf-8'))
+			#serial_message = struct.pack()
+			#self.serial_io.write(message.encode('utf-8'))
+			pass # REWRITE
 
 	def read(self):
 		while True:
 			try:
-				reading = self.serial_io.readline().decode('utf-8')
+				reading = self.serial_io.readline()
 				if reading:
 					yield reading
 			except UnicodeDecodeError as e:
 				sys.stderr.write('Decode error at Arduino: %s\n' % str(e))
+
+
+class ObservableData:
+	def __init__(self, callback_reader):
+		self.listeners = []
+		self.reader = callback_reader
+
+	def add_listener(self, listener):
+		self.listeners.append(listener)
+
+	def _notify_listeners(self, message):
+		for listener in self.listeners:
+			listener(message)
+
+	def _run(self):
+		for data in self.reader():
+			self._notify_listeners(data)
+
+	def __call__(self):
+		start_new_thread(self._run, ())
 

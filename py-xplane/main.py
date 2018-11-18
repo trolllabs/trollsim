@@ -1,7 +1,6 @@
 import sys, logging, threading
-from readers import ArduinoReader, SocketReader
-from processors import GloveMultiplier, FrontendSocket
-from endpoints import UDPClient, UDPServer, TCPServer, Arduino
+from endpoints import UDPClient, UDPServer, TCPServer, Arduino, ObservableData
+from processors import GloveMultiplier, FrontendSocket, PlatformWriter
 
 
 def main():
@@ -19,10 +18,10 @@ def main():
 	glove_arduino = Arduino(glove_sn, 115200)
 	ehealth_arduino = Arduino(ehealth_sn, 115200)
 
-	glove_reader = ArduinoReader(glove_arduino.read)
-	ehealth_reader = ArduinoReader(ehealth_arduino.read)
-	frontend_reader = SocketReader(frontend_socket.read)
-	xplane_reader = SocketReader(xplane_readsocket.read)
+	glove_reader = ObservableData(glove_arduino.read)
+	ehealth_reader = ObservableData(ehealth_arduino.read)
+	frontend_reader = ObservableData(frontend_socket.read)
+	xplane_reader = ObservableData(xplane_readsocket.read)
 
 	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_writesocket.send)
 	frontend = FrontendSocket(
