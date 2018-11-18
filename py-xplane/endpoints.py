@@ -2,24 +2,6 @@ import socket, sys, serial, threading
 from _thread import start_new_thread
 
 
-def udp_server(udp_sock, address):
-	try:
-		print('Binding..')
-		udp_sock.bind(address)
-		print('UDP: Listening to %s %s' % address)
-		while True:
-			data, addr = udp_sock.recvfrom(1024)
-			print(data.hex().upper())
-	except socket.error as e:
-		sys.stderr.write('Socket Error: %s\n' % str(e))
-	except Exception as e:
-		sys.stderr.write('Error: %s\n' % str(e))
-	finally:
-		sock.close()
-		print('Socket closed')
-		sys.exit(0)
-
-
 class UDPClient:
 	def __init__(self, host, port):
 		self.lock = threading.Lock()
