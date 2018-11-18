@@ -6,7 +6,7 @@ class GloveMultiplier:
 	def __init__(self, glove_reader, frontend_reader, data_output):
 		from xplane_tools import expected_reading, XPlaneDataAdapter
 		self.data_multipliers = {}
-		self.packet_wrapper = XPlaneDataAdapter()
+		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
 		self.dref_names = expected_reading
 		self.data_output = data_output
 		glove_reader.add_listener(self.data_sender)

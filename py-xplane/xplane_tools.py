@@ -37,10 +37,20 @@ class XPlaneDataAdapter:
 		packer = struct.Struct('<%ds %s %ds %ds' % (len(header), dtype, len(name), pad_length))
 		return packer.pack(*(header.encode(), value, name.encode(), pad))
 
-	def __call__(self, value, name, dtype=None):
+	def parse_to_dref(self, value, name, dtype=None):
 		if type(value) == bool:
 			dtype, value = self._xplane_boolean(value)
 		if not dtype:
 			dtype = self.dtype_lookup[type(value)]
 		return self.wrap(value, name, dtype)
+
+	def parse_from_dref(self, packet):
+		'''
+		TODO: Lookup on dref dictionary for datatypes
+		Only supports float datarefs
+		'''
+		name = str(packet[9:].strip(b'\x00'))
+		raw_value = packet[5:9]
+		value = struct.unpack('f', raw_value)[0]
+		return name, value
 
