@@ -4,10 +4,10 @@ from _thread import start_new_thread
 
 class GloveMultiplier:
 	def __init__(self, glove_reader, frontend_reader, data_output):
-		from xplane_tools import expected_reading, XPlaneDataAdapter
+		from xplane_tools import expected_glove_data, XPlaneDataAdapter
 		self.data_multipliers = {}
 		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
-		self.dref_names = expected_reading
+		self.dref_names = expected_glove_data
 		self.data_output = data_output
 		glove_reader.add_listener(self.data_sender)
 		frontend_reader.add_listener(self.frontend_handler)

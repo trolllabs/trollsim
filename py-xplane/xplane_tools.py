@@ -1,7 +1,7 @@
 import struct
 
 
-expected_reading = {
+expected_glove_data = {
 		0: 'sim/test/test_float',
 		1: 'sim/joystick/yoke_roll_ratio',
 		2: 'sim/joystick/yoke_pitch_ratio',
