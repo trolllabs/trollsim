@@ -1,4 +1,4 @@
-import socket, sys, serial, threading
+import socket, sys, serial, threading, struct
 from _thread import start_new_thread
 
 
@@ -86,9 +86,11 @@ class Arduino:
 
 	def send(self, message):
 		with self.lock:
-			#serial_message = struct.pack()
-			#self.serial_io.write(message.encode('utf-8'))
-			pass # REWRITE
+			try:
+				serial_message = struct.pack('>i', message)
+				self.serial_io.write(serial_message)
+			except Exception:
+				pass
 
 	def read(self):
 		while True:

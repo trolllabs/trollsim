@@ -39,6 +39,31 @@ class GloveMultiplier:
 			sys.stderr.write(error_msg)
 
 
+class PlatformWriter:
+	def __init__(self, socket_reader, data_output, platform):
+		from xplane_tools import XPlaneDataAdapter
+		self.packet_parser = XPlaneDataAdapter().parse_from_dref
+		self.data_output = data_output
+		socket_reader.add_listener(self.xplane_receiver)
+		platform.add_listener(print) # debug only
+
+	def xplane_receiver(self, data):
+		name, value = self.packet_parser(data)
+		value = int(value)
+		if 'true_phi' in name:
+			print('phi: %s, %s' % (value, name))
+			if abs(value) >= 90:
+				self.data_output(0)
+			else:
+				self.data_output(value + 90)
+		elif 'true_theta' in name:
+			print('theta: %s, %s' % (value, name))
+			if abs(value) >= 90:
+				self.data_output(360)
+			else:
+				self.data_output(value + 90 + 180)
+
+
 class FrontendSocket:
 	def __init__(self, handler, socket_reader, ehealth_reader, data_output):
 		self.data_output = data_output
