@@ -27,13 +27,9 @@ def main():
 
 	platform_reader = ObservableData(platform_arduino.read) # debug only
 
-	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_writesocket.send)
-	frontend = FrontendSocket(
-			glove_processor.frontend_handler,
-			frontend_reader,
-			glove_reader,
-			frontend_socket.send)
-	platform = PlatformWriter(xplane_reader, platform_arduino.send, platform_reader)
+	glove_processor = GloveMultiplier(glove_reader, frontend_reader, xplane_writesocket)
+	frontend = FrontendSocket([glove_processor.frontend_handler], [glove_arduino], frontend_socket)
+	platform = PlatformWriter(xplane_readsocket, platform_arduino)
 
 	glove_reader()
 	ehealth_reader()

@@ -71,6 +71,7 @@ class Arduino:
 		from serial.tools import list_ports
 		self.lock = threading.Lock()
 		try:
+			from serial.tools import list_ports
 			print('Looking up arduino with serial number %s..' % serial_number)
 			arduino_port = next(list_ports.grep(serial_number))
 			print('Found hwid: %s' % arduino_port.hwid)
@@ -89,8 +90,8 @@ class Arduino:
 			try:
 				serial_message = struct.pack('>i', message)
 				self.serial_io.write(serial_message)
-			except Exception:
-				pass
+			except Exception as e:
+				logging.exception(e)
 
 	def read(self):
 		while True:

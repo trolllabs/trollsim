@@ -1,5 +1,4 @@
 import sys, logging
-from _thread import start_new_thread
 
 
 class GloveMultiplier:
@@ -30,7 +29,7 @@ class GloveMultiplier:
 			for i, data in enumerate(glove_data):
 				processed_data = data*self.data_multipliers.get(i, 1)
 				packet = self.packet_wrapper(processed_data, self.dref_names[i])
-				self.data_output(packet)
+				self.data_output.send(packet)
 		except AssertionError:
 			error_msg = 'GloveMultiplier: Unclean reading, %s\n' % reading
 			sys.stderr.write(error_msg)
@@ -40,12 +39,12 @@ class GloveMultiplier:
 
 
 class PlatformWriter:
-	def __init__(self, socket_reader, data_output, platform):
+	def __init__(self, socket_reader, platform_arduino):
 		from xplane_tools import XPlaneDataAdapter
 		self.packet_parser = XPlaneDataAdapter().parse_from_dref
-		self.data_output = data_output
+		self.data_output = platform_arduino
 		socket_reader.add_listener(self.xplane_receiver)
-		platform.add_listener(print) # debug only
+		platform_arduino.add_listener(print) # debug only
 
 	def xplane_receiver(self, data):
 		name, value = self.packet_parser(data)
@@ -53,27 +52,29 @@ class PlatformWriter:
 		if 'true_phi' in name:
 			print('phi: %s, %s' % (value, name))
 			if abs(value) >= 90:
-				self.data_output(0)
+				self.data_output.send(0)
 			else:
-				self.data_output(value + 90)
+				self.data_output.send(value + 90)
 		elif 'true_theta' in name:
 			print('theta: %s, %s' % (value, name))
 			if abs(value) >= 90:
-				self.data_output(360)
+				self.data_output.send(360)
 			else:
-				self.data_output(value + 90 + 180)
+				self.data_output.send(value + 90 + 180)
 
 
 class FrontendSocket:
-	def __init__(self, handler, socket_reader, ehealth_reader, data_output):
-		self.data_output = data_output
-		self.data_handler = handler
-		socket_reader.add_listener(self.frontend_receiver)
-		ehealth_reader.add_listener(self.frontend_sender)
+	def __init__(self, listeners, readers, frontend_socket):
+		frontend_socket.add_listener(self.frontend_receiver)
+		self.data_output = frontend_socket
+		self.listeners = listeners
+		for reader in readers:
+			reader.add_listener(self.data_forwarder)
 
 	def frontend_receiver(self, data):
-		self.data_handler(data)
+		for listener in self.listeners:
+			listener(data)
 
-	def frontend_sender(self, data):
-		self.data_output(data)
+	def data_forwarder(self, data):
+		self.data_output.send(data)
 
