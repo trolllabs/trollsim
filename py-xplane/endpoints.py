@@ -2,8 +2,27 @@ import socket, sys, serial, threading, struct
 from _thread import start_new_thread
 
 
-class UDPClient:
+class ObservableData:
+	def __init__(self):
+		self.listeners = []
+
+	def add_listener(self, listener):
+		self.listeners.append(listener)
+
+	def _notify_listeners(self, message):
+		for listener in self.listeners:
+			listener(message)
+
+	def _run(self):
+		raise NotImplementedError('ObservableData: No read function implemented!')
+
+	def __call__(self):
+		start_new_thread(self._run, ())
+
+
+class UDPClient(ObservableData):
 	def __init__(self, host, port):
+		ObservableData.__init__(self)
 		self.lock = threading.Lock()
 		self.address = (host, port)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -12,14 +31,15 @@ class UDPClient:
 		with self.lock:
 			self.sock.sendto(message, self.address)
 
-	def read(self):
+	def _read(self):
 		while True:
 			data = self.sock.recv(1024)
-			yield data
+			self._notify_listeners(data)
 
 
-class UDPServer:
+class UDPServer(ObservableData):
 	def __init__(self, host, port):
+		ObservableData.__init__(self)
 		self.lock = threading.Lock()
 		self.address = (host, port)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -31,17 +51,18 @@ class UDPServer:
 		with self.lock:
 			self.sock.sendto(message, addr)
 
-	def read(self):
+	def _read(self):
 		while True:
 			data, addr = self.sock.recvfrom(509)
-			yield data
+			self._notify_listeners(data)
 
 
-class TCPServer:
+class TCPServer(ObservableData):
 	'''
 	Accepts only one connection
 	'''
 	def __init__(self, host, port):
+		ObservableData.__init__(self)
 		self.lock = threading.Lock()
 		self.address = (host, port)
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -55,20 +76,21 @@ class TCPServer:
 		with self.lock:
 			self.conn.send(message)
 
-	def read(self):
+	def _read(self):
 		while True:
 			data = self.conn.recv(1024)
 			if not data: raise ConnectionError('Broken pipe, no more data received')
-			yield data
+			self._notify_listeners(data)
 
 	def close(self):
 		self.sock.close()
 		print('TCP Server closed.')
 
 
-class Arduino:
+class Arduino(ObservableData):
 	def __init__(self, serial_number, baudrate):
 		from serial.tools import list_ports
+		ObservableData.__init__(self)
 		self.lock = threading.Lock()
 		try:
 			from serial.tools import list_ports
@@ -93,32 +115,12 @@ class Arduino:
 			except Exception as e:
 				logging.exception(e)
 
-	def read(self):
+	def _read(self):
 		while True:
 			try:
 				reading = self.serial_io.readline()
 				if reading:
-					yield reading
+					self._notify_listeners(reading)
 			except UnicodeDecodeError as e:
 				sys.stderr.write('Decode error at Arduino: %s\n' % str(e))
-
-
-class ObservableData:
-	def __init__(self, callback_reader):
-		self.listeners = []
-		self.reader = callback_reader
-
-	def add_listener(self, listener):
-		self.listeners.append(listener)
-
-	def _notify_listeners(self, message):
-		for listener in self.listeners:
-			listener(message)
-
-	def _run(self):
-		for data in self.reader():
-			self._notify_listeners(data)
-
-	def __call__(self):
-		start_new_thread(self._run, ())
 
