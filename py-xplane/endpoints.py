@@ -1,5 +1,4 @@
 import socket, sys, serial, threading, struct
-from _thread import start_new_thread
 
 
 class ObservableData:
@@ -13,11 +12,13 @@ class ObservableData:
 		for listener in self.listeners:
 			listener(message)
 
-	def _run(self):
+	def _read(self):
 		raise NotImplementedError('ObservableData: No read function implemented!')
 
 	def __call__(self):
-		start_new_thread(self._run, ())
+		thread = threading.Thread(target=self._read, args=())
+		thread.start()
+		return thread
 
 
 class UDPClient(ObservableData):

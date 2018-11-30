@@ -12,6 +12,7 @@ def main():
 	glove_sn = 'AH03J54W'
 	ehealth_sn = '7533832353535140E1C2'
 	platform_sn = '85439303133351D0B002'
+	threads = []
 
 	xplane_writesocket = UDPClient(xplane_ip, xplane_port)
 	xplane_readsocket = UDPServer('0.0.0.0', xplane_port)
@@ -24,16 +25,15 @@ def main():
 	frontend = FrontendSocket([glove_processor.frontend_handler], [glove_arduino], frontend_socket)
 	platform = PlatformWriter(xplane_readsocket, platform_arduino)
 
-	glove_reader()
-	ehealth_reader()
-	frontend_reader()
-	xplane_reader()
-	platform_reader()
+	threads.append(glove_arduino())
+	threads.append(ehealth_arduino())
+	threads.append(frontend_socket())
+	threads.append(xplane_readsocket())
+	threads.append(platform_arduino())
 
-
-	# Very temporary solution
-	from time import sleep
-	sleep(2**63/10**9-1)
+	# Wait for threads to terminate (will never happen)
+	for thread in threads:
+		thread.join()
 
 
 if __name__ == "__main__":
