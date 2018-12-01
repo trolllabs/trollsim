@@ -1,6 +1,6 @@
 import sys, logging, threading
 from endpoints import UDPClient, UDPServer, TCPServer, Arduino, ObservableData
-from processors import GloveMultiplier, FrontendSocket, PlatformWriter
+from processors import GloveMultiplier, PlatformWriter
 
 
 def main():
@@ -22,7 +22,6 @@ def main():
 	platform_arduino = Arduino(platform_sn, 115200)
 
 	glove_processor = GloveMultiplier(glove_arduino, frontend_socket, xplane_writesocket)
-	frontend = FrontendSocket([glove_processor.frontend_handler], [glove_arduino], frontend_socket)
 	platform = PlatformWriter(xplane_readsocket, platform_arduino)
 
 	threads.append(glove_arduino())
