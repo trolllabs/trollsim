@@ -1,7 +1,26 @@
 import sys, logging
 
 
+''' Data processors
+
+A collection of hubs where data pass through, gets possibly mutated
+and sent further.
+'''
+
+
 class GloveMultiplier:
+	'''
+	Takes a datastream from the glove arduino and multiplies it with
+	self.data_multipliers. data_multipliers can be changed through
+	frontend_handler, which in turn is set from the frontend.
+
+	                    frontend (agent)
+	                           |
+	                           v
+	[glove_arduino] -> [GloveMultiplier] -> [data output]
+
+	[glove_arduino] -> [frontend]
+	'''
 	def __init__(self, glove_arduino, frontend, data_output):
 		from xplane_tools import expected_glove_data, XPlaneDataAdapter
 		self.data_multipliers = {}
@@ -40,6 +59,11 @@ class GloveMultiplier:
 
 
 class PlatformWriter:
+	'''
+	Reads from xplane before passing it onto the platform arduino
+
+	[xplane] -> [PlatformWriter] -> [platform_arduino]
+	'''
 	def __init__(self, xplane_readsocket, platform_arduino):
 		from xplane_tools import XPlaneDataAdapter
 		self.packet_parser = XPlaneDataAdapter().parse_from_dref

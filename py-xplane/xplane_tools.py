@@ -1,6 +1,13 @@
 import struct
 
 
+''' X-Plane Tools
+
+Tools for mostly variable lookup and data conversion to formats defined
+by X-Plane
+'''
+
+
 expected_glove_data = {
 		0: 'sim/test/test_float',
 		1: 'sim/joystick/yoke_roll_ratio',
@@ -10,6 +17,14 @@ expected_glove_data = {
 
 
 class XPlaneDataAdapter:
+	'''
+	Can convert data from and to dataref (dref), which is X-Plane's
+	pre-defined packet structure. Use parse_to_dref and parse_from_dref
+	methods.
+
+	If dtype_lookup does not contain the value to convert to dref, wrap
+	is also possible to use to manually set the datatype.
+	'''
 	def __init__(self):
 		# Use signed integer type when assigning boolean packet values
 		self.XP_True = 0x3F800000
@@ -22,13 +37,19 @@ class XPlaneDataAdapter:
 	def _create_null_pad(self, pad_length):
 		return ('\0'*pad_length).encode()
 
-	def _xplane_boolean(self, arg):
+	def _xplane_boolean(self, arg: bool):
+		'''
+		Convert argument to a format X-Plane accepts as boolean value.
+		'''
 		xp_bool = self.XP_False
 		if arg:
 			xp_bool = self.XP_True
 		return 'i', xp_bool
 
 	def wrap(self, value, name, dtype):
+		'''
+		Builds a dref packet with binary values.
+		'''
 		header = self._null_terminate('DREF')
 		name = self._null_terminate(name)
 		pad_length = 509 - (len(header) + 4 + len(name))
@@ -46,8 +67,7 @@ class XPlaneDataAdapter:
 
 	def parse_from_dref(self, packet):
 		'''
-		TODO: Lookup on dref dictionary for datatypes
-		Only supports float datarefs
+		Currently only supports float datarefs
 		'''
 		name = str(packet[9:].strip(b'\x00'))
 		raw_value = packet[5:9]

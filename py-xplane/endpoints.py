@@ -1,7 +1,23 @@
 import socket, sys, serial, threading, struct
 
 
+''' Endpoints
+
+This module contains all the endpoint logic. Most classes here should
+have standardized read and send methods, unless they are intended for
+only one way communication.
+
+The read method is intended to be a private method as all external read
+calls should go through observer subscription pattern.
+'''
+
+
 class ObservableData:
+	'''
+	Implementation of the observer pattern through callbacks. External
+	functions can read children classes through a callback handler with
+	add_listener(callback)
+	'''
 	def __init__(self):
 		self.listeners = []
 
@@ -13,6 +29,9 @@ class ObservableData:
 			listener(message)
 
 	def _read(self):
+		'''
+		Force _read implementation for children classes
+		'''
 		raise NotImplementedError('ObservableData: No read function implemented!')
 
 	def __call__(self):
