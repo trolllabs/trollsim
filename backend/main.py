@@ -1,27 +1,41 @@
-import sys, logging, threading
+import sys, logging, threading, json, argparse
 from endpoints import UDPClient, UDPServer, TCPServer, Arduino, ObservableData
 from processors import GloveMultiplier, PlatformWriter
 
 
+class ArgparseHelper(argparse.ArgumentParser):
+	def error(self, message):
+		sys.stderr.write('error: %s\n' % message)
+		self.print_help()
+		sys.exit(2)
+
+
+parser = ArgparseHelper()
+parser.add_argument('-f','--file', type=str, default='config.json',
+		help='Set the path of config file. Default is config.json in working directory.')
+args = parser.parse_args()
+
+
 def main():
-	# Define headers. TODO argparse later
+	# Define headers.
 	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
-	xplane_ip = '10.53.25.98'
-	xplane_port = 49000
-	frontend_ip = 'localhost'
-	frontend_port = 8005
-	glove_sn = 'AH03J54W'
-	ehealth_sn = '7533832353535140E1C2'
-	platform_sn = '85439303133351D0B002'
 	threads = []
 
-	# Initialize components, and also connecting to external endpoints
-	xplane_writesocket = UDPClient(xplane_ip, xplane_port)
-	xplane_readsocket = UDPServer('0.0.0.0', xplane_port)
-	frontend_socket = TCPServer(frontend_ip, frontend_port)
-	glove_arduino = Arduino(glove_sn, 115200)
-	ehealth_arduino = Arduino(ehealth_sn, 115200)
-	platform_arduino = Arduino(platform_sn, 115200)
+	with open(args.file, 'r') as f:
+		config = json.load(f)
+	xplane_config = config['xplane']
+	xplane_config = config['xplane']
+	frontend_config = config['frontend']
+	arduino_config = config['arduino']
+
+	# Initialize local endpoints and also connecting to external endpoints
+	xplane_writesocket = UDPClient(xplane_config['write']['ip'], xplane_config['write']['port'])
+	xplane_readsocket = UDPServer(xplane_config['read']['ip'], xplane_config['read']['write'])
+	frontend_socket = TCPServer(frontend_config['ip'], frontend_config['port'])
+	glove_arduino = Arduino(arduino_config['glove'], 115200)
+	ehealth_arduino = Arduino(arduino_config['ehealth'], 115200)
+	platform_arduino = Arduino(arduino_config['platform'], 115200)
+
 
 	# Initialize processing logic and connect internal endpoints
 	glove_processor = GloveMultiplier(glove_arduino, frontend_socket, xplane_writesocket)

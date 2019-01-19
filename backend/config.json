@@ -1,0 +1,21 @@
+{
+	"xplane": {
+		"read": {
+			"ip": "0.0.0.0",
+			"port": 49000
+		},
+		"write": {
+			"ip": "127.0.0.1",
+			"port": 49000
+		}
+	},
+	"frontend": {
+		"ip": "localhost",
+		"port": 8005
+	},
+	"arduino": {
+		"ehealth": "7533832353535140E1C2",
+		"platform": "85439303133351D0B002",
+		"glove": "AH03J54W"
+	}
+}
