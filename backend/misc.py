@@ -1,10 +1,10 @@
 import struct
 
 
-''' X-Plane Tools
+''' Misc
 
-Tools for mostly variable lookup and data conversion to formats defined
-by X-Plane
+General tools for mostly variable lookup and data conversion, including
+to and from DREF (format defined by X-Plane).
 '''
 
 
