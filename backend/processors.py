@@ -22,7 +22,7 @@ class GloveMultiplier:
 	[glove_arduino] -> [frontend]
 	'''
 	def __init__(self, glove_arduino, frontend, data_output):
-		from xplane_tools import expected_glove_data, XPlaneDataAdapter
+		from misc import expected_glove_data, XPlaneDataAdapter
 		self.data_multipliers = {}
 		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
 		self.dref_names = expected_glove_data
@@ -65,7 +65,7 @@ class PlatformWriter:
 	[xplane] -> [PlatformWriter] -> [platform_arduino]
 	'''
 	def __init__(self, xplane_readsocket, platform_arduino):
-		from xplane_tools import XPlaneDataAdapter
+		from misc import XPlaneDataAdapter
 		self.packet_parser = XPlaneDataAdapter().parse_from_dref
 		self.data_output = platform_arduino
 		xplane_readsocket.add_listener(self.xplane_receiver)
