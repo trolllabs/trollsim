@@ -41,6 +41,13 @@ class ObservableData:
 
 
 class UDPClient(ObservableData):
+	'''
+	Args:
+		config (dict): Has the keywords "id", "ip" and "port" to
+			establish a connection to socket server.
+			The "id" keyword is the packet identifier for where a
+			reading originates from.
+	'''
 	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
@@ -59,6 +66,13 @@ class UDPClient(ObservableData):
 
 
 class UDPServer(ObservableData):
+	'''
+	Args:
+		config (dict): Has the keywords "id", "ip" and "port" to
+			establish a socket server.
+			The "id" keyword is the packet identifier for where a
+			reading originates from.
+	'''
 	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
@@ -81,7 +95,13 @@ class UDPServer(ObservableData):
 
 class TCPServer(ObservableData):
 	'''
-	Accepts only one connection
+	Accepts only one connection.
+
+	Args:
+		config (dict): Has the keywords "id", "ip" and "port" to
+			establish a socket server.
+			The "id" keyword is the packet identifier for where a
+			reading originates from.
 	'''
 	def __init__(self, config):
 		ObservableData.__init__(self)
@@ -110,6 +130,15 @@ class TCPServer(ObservableData):
 
 
 class Arduino(ObservableData):
+	'''
+	Args:
+		config (dict): Has the keywords "id", "sn" and "baudrate" to
+			establish connection with a specific arduino.
+			The "id" keyword is the packet identifier for where a
+			reading originates from.
+			"sn" stands for serial number, which are unique for all
+			arduinos.
+	'''
 	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
