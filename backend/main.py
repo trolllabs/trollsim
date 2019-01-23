@@ -1,5 +1,5 @@
 import sys, logging, threading, json, argparse
-from endpoints import UDPClient, UDPServer, TCPServer, Arduino, ObservableData
+from endpoints import UDPClient, UDPServer, TCPServer, Arduino
 from processors import GloveMultiplier, PlatformWriter
 
 
@@ -23,10 +23,6 @@ def main():
 
 	with open(args.file, 'r') as f:
 		config = json.load(f)
-	xplane_config = config['xplane']
-	xplane_config = config['xplane']
-	frontend_config = config['frontend']
-	arduino_config = config['arduino']
 
 	# Initialize local endpoints and also connecting to external endpoints
 	xplane_writesocket = UDPClient(config['xplane']['write'])

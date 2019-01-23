@@ -1,4 +1,5 @@
 import socket, sys, serial, threading, struct
+from serial.tools import list_ports
 
 
 ''' Endpoints
@@ -12,7 +13,7 @@ calls should go through observer subscription pattern.
 '''
 
 
-class ObservableData:
+class ObservableReading:
 	'''
 	Implementation of the observer pattern through callbacks. External
 	functions can read children classes through a callback handler with
@@ -20,6 +21,7 @@ class ObservableData:
 	'''
 	def __init__(self):
 		self.listeners = []
+		self.lock = threading.Lock()
 
 	def add_listener(self, listener):
 		self.listeners.append(listener)
@@ -32,7 +34,7 @@ class ObservableData:
 		'''
 		Force _read implementation for children classes
 		'''
-		raise NotImplementedError('ObservableData: No read function implemented!')
+		raise NotImplementedError('ObservableReading: No read function implemented!')
 
 	def __call__(self):
 		thread = threading.Thread(target=self._read, args=())
@@ -40,7 +42,7 @@ class ObservableData:
 		return thread
 
 
-class UDPClient(ObservableData):
+class UDPClient(ObservableReading):
 	'''
 	Args:
 		config (dict): Has the keywords "id", "ip" and "port" to
@@ -49,8 +51,7 @@ class UDPClient(ObservableData):
 			reading originates from.
 	'''
 	def __init__(self, config):
-		ObservableData.__init__(self)
-		self.lock = threading.Lock()
+		ObservableReading.__init__(self)
 		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -65,7 +66,7 @@ class UDPClient(ObservableData):
 			self._notify_listeners(data)
 
 
-class UDPServer(ObservableData):
+class UDPServer(ObservableReading):
 	'''
 	Args:
 		config (dict): Has the keywords "id", "ip" and "port" to
@@ -74,8 +75,7 @@ class UDPServer(ObservableData):
 			reading originates from.
 	'''
 	def __init__(self, config):
-		ObservableData.__init__(self)
-		self.lock = threading.Lock()
+		ObservableReading.__init__(self)
 		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -93,7 +93,7 @@ class UDPServer(ObservableData):
 			self._notify_listeners(data)
 
 
-class TCPServer(ObservableData):
+class TCPServer(ObservableReading):
 	'''
 	Accepts only one connection.
 
@@ -104,7 +104,7 @@ class TCPServer(ObservableData):
 			reading originates from.
 	'''
 	def __init__(self, config):
-		ObservableData.__init__(self)
+		ObservableReading.__init__(self)
 		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -129,7 +129,7 @@ class TCPServer(ObservableData):
 		print('TCP Server closed.')
 
 
-class Arduino(ObservableData):
+class Arduino(ObservableReading):
 	'''
 	Args:
 		config (dict): Has the keywords "id", "sn" and "baudrate" to
@@ -140,8 +140,7 @@ class Arduino(ObservableData):
 			arduinos.
 	'''
 	def __init__(self, config):
-		ObservableData.__init__(self)
-		self.lock = threading.Lock()
+		ObservableReading.__init__(self)
 		self.data_id = config['id']
 		try:
 			print('Looking up arduino with serial number %s..' % config['sn'])
