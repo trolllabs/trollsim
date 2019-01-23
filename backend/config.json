@@ -1,21 +1,36 @@
 {
 	"xplane": {
 		"read": {
+			"id": 0,
 			"ip": "0.0.0.0",
 			"port": 49000
 		},
 		"write": {
+			"id": 0,
 			"ip": "127.0.0.1",
 			"port": 49000
 		}
 	},
 	"frontend": {
+		"id": 1,
 		"ip": "localhost",
 		"port": 8005
 	},
 	"arduino": {
-		"ehealth": "7533832353535140E1C2",
-		"platform": "85439303133351D0B002",
-		"glove": "AH03J54W"
+		"ehealth": {
+			"id": 50,
+			"sn": "7533832353535140E1C2",
+			"baudrate": 115200
+		},
+		"platform": {
+			"id": 51,
+			"sn": "85439303133351D0B002",
+			"baudrate": 115200
+		},
+		"glove": {
+			"id": 52,
+			"sn": "AH03J54W",
+			"baudrate": 115200
+		}
 	}
 }

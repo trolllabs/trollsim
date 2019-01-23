@@ -41,10 +41,11 @@ class ObservableData:
 
 
 class UDPClient(ObservableData):
-	def __init__(self, host, port):
+	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
-		self.address = (host, port)
+		self.data_id = config['id']
+		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def send(self, message):
@@ -58,10 +59,11 @@ class UDPClient(ObservableData):
 
 
 class UDPServer(ObservableData):
-	def __init__(self, host, port):
+	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
-		self.address = (host, port)
+		self.data_id = config['id']
+		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		print('UDP server listening at %s %s' % self.address)
@@ -81,10 +83,10 @@ class TCPServer(ObservableData):
 	'''
 	Accepts only one connection
 	'''
-	def __init__(self, host, port):
+	def __init__(self, config):
 		ObservableData.__init__(self)
-		self.lock = threading.Lock()
-		self.address = (host, port)
+		self.data_id = config['id']
+		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		print('TCP server listening to frontend at %s %s' % self.address)
@@ -108,16 +110,15 @@ class TCPServer(ObservableData):
 
 
 class Arduino(ObservableData):
-	def __init__(self, serial_number, baudrate):
-		from serial.tools import list_ports
+	def __init__(self, config):
 		ObservableData.__init__(self)
 		self.lock = threading.Lock()
+		self.data_id = config['id']
 		try:
-			from serial.tools import list_ports
-			print('Looking up arduino with serial number %s..' % serial_number)
-			arduino_port = next(list_ports.grep(serial_number))
+			print('Looking up arduino with serial number %s..' % config['sn'])
+			arduino_port = next(list_ports.grep(config['sn']))
 			print('Found hwid: %s' % arduino_port.hwid)
-			self.serial_io = serial.Serial(arduino_port.device, baudrate)
+			self.serial_io = serial.Serial(arduino_port.device, config['baudrate'])
 		except StopIteration:
 			sys.stderr.write('Arduino: Could not find serial number. Is it correct?\n')
 			raise Exception # Crash and burn for now

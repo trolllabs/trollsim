@@ -29,12 +29,12 @@ def main():
 	arduino_config = config['arduino']
 
 	# Initialize local endpoints and also connecting to external endpoints
-	xplane_writesocket = UDPClient(xplane_config['write']['ip'], xplane_config['write']['port'])
-	xplane_readsocket = UDPServer(xplane_config['read']['ip'], xplane_config['read']['write'])
-	frontend_socket = TCPServer(frontend_config['ip'], frontend_config['port'])
-	glove_arduino = Arduino(arduino_config['glove'], 115200)
-	ehealth_arduino = Arduino(arduino_config['ehealth'], 115200)
-	platform_arduino = Arduino(arduino_config['platform'], 115200)
+	xplane_writesocket = UDPClient(config['xplane']['write'])
+	xplane_readsocket = UDPServer(config['xplane']['read'])
+	frontend_socket = TCPServer(config['frontend'])
+	glove_arduino = Arduino(config['arduino']['glove'])
+	ehealth_arduino = Arduino(config['arduino']['ehealth'])
+	platform_arduino = Arduino(config['arduino']['platform'])
 
 
 	# Initialize processing logic and connect internal endpoints
