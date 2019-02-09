@@ -16,20 +16,27 @@ expected_glove_data = {
 		}
 
 
+unpack_types = {
+		'float': 'f',
+		'int': 'i',
+		float: 'f',
+		int: 'i'
+		}
+
+
 class XPlaneDataAdapter:
 	'''
 	Can convert data from and to dataref (dref), which is X-Plane's
 	pre-defined packet structure. Use parse_to_dref and parse_from_dref
 	methods.
 
-	If dtype_lookup does not contain the value to convert to dref, wrap
+	If unpack_types does not contain the value to convert to dref, wrap
 	is also possible to use to manually set the datatype.
 	'''
 	def __init__(self):
 		# Use signed integer type when assigning boolean packet values
 		self.XP_True = 0x3F800000
 		self.XP_False = 0x00000000
-		self.dtype_lookup = {float: 'f', int: 'i'}
 
 	def _null_terminate(self, s):
 		return s + '\0'
@@ -62,7 +69,7 @@ class XPlaneDataAdapter:
 		if type(value) == bool:
 			dtype, value = self._xplane_boolean(value)
 		if not dtype:
-			dtype = self.dtype_lookup[type(value)]
+			dtype = unpack_types[type(value)]
 		return self.wrap(value, name, dtype)
 
 	def parse_from_dref(self, packet):
