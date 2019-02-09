@@ -145,8 +145,8 @@ class Arduino(ObservableReading):
 					% (config['name'], arduino_port.hwid, arduino_port.device))
 			self.serial_io = serial.Serial(arduino_port.device, config['baudrate'])
 		except StopIteration:
-			sys.stderr.write('Arduino: Could not find serial number. Is it correct?\n')
-			raise Exception # Crash and burn for now
+			e = 'Arduino: Could not find serial %s for %s.\n' % (config['sn'], config['name'])
+			sys.stderr.write(e)
 		except serial.serialutil.SerialExcepion as e:
 			e = 'Arduino error: %s\n' % str(e)
 			sys.stderr.write(e)
