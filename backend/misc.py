@@ -1,4 +1,5 @@
 import struct
+from time import perf_counter
 
 
 ''' Misc
@@ -80,4 +81,26 @@ class XPlaneDataAdapter:
 		raw_value = packet[5:9]
 		value = struct.unpack('f', raw_value)[0]
 		return name, value
+
+
+class TrollPacket:
+	'''
+	Internal data representation.
+
+	Args:
+		raw_data (binary): Packet data
+		data (int/float):  Interpreted packet data
+	'''
+	def __init__(self, raw_data, data):
+		self.data = data
+		self.raw_data = raw_data
+		self.data_id = raw_data[0]
+		self.timestamp = int(perf_counter()*1000)
+
+	def __str__(self):
+		retval = '%s' % type(self).__name__
+		classvars = vars(self)
+		for var in classvars.keys():
+			retval += '\n\t%s: %s' % (var, classvars[var])
+		return retval
 
