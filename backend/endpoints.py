@@ -52,7 +52,6 @@ class UDPClient(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -76,7 +75,6 @@ class UDPServer(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -105,7 +103,6 @@ class TCPServer(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.data_id = config['id']
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -141,19 +138,19 @@ class Arduino(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.data_id = config['id']
 		try:
-			print('Looking up arduino with serial number %s..' % config['sn'])
+			print('Arduino: Looking up %s..' % config['name'])
 			arduino_port = next(list_ports.grep(config['sn']))
-			print('Found hwid: %s' % arduino_port.hwid)
+			print('%s: Found hwid: %s at %s' \
+					% (config['name'], arduino_port.hwid, arduino_port.device))
 			self.serial_io = serial.Serial(arduino_port.device, config['baudrate'])
 		except StopIteration:
 			sys.stderr.write('Arduino: Could not find serial number. Is it correct?\n')
 			raise Exception # Crash and burn for now
 		except serial.serialutil.SerialExcepion as e:
-			error_msg = 'Arduino error: %s\n' % str(e)
-			sys.stderr.write(error_msg)
-			logging.exception(error_msg)
+			e = 'Arduino error: %s\n' % str(e)
+			sys.stderr.write(e)
+			logging.exception(e)
 			raise Exception # Crash and burn for now
 
 	def send(self, message):

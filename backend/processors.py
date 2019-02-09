@@ -37,9 +37,9 @@ class GloveMultiplier:
 			assert len(data) == 2
 			self.data_multipliers[int(data[0])] = float(data[1])
 		except AssertionError:
-			error_msg = 'GloveMultiplier: Too many values, %d\n' % len(data)
-			sys.stderr.write(error_msg)
-			logging.exception(error_msg)
+			e = 'GloveMultiplier: Too many values, %d\n' % len(data)
+			sys.stderr.write(e)
+			logging.exception(e)
 
 	def data_sender(self, reading):
 		try:
@@ -51,11 +51,11 @@ class GloveMultiplier:
 				packet = self.packet_wrapper(processed_data, self.dref_names[i])
 				self.data_output.send(packet)
 		except AssertionError:
-			error_msg = 'Dimension mismatch:%s|%s\n' % (reading, self.data_multipliers)
-			sys.stderr.write(error_msg)
-		except ValueError as e:
-			error_msg = 'GloveMultiplier: Unclean reading, %s\n' % glove_data
-			sys.stderr.write(error_msg)
+			e = 'Dimension mismatch:%s|%s\n' % (reading, self.data_multipliers)
+			sys.stderr.write(e)
+		except ValueError:
+			e = 'GloveMultiplier: Unclean reading, %s\n' % glove_data
+			sys.stderr.write(e)
 
 
 class PlatformWriter:
