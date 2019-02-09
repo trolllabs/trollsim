@@ -163,10 +163,7 @@ class Arduino(ObservableReading):
 
 	def _read(self):
 		while True:
-			try:
-				reading = self.serial_io.readline()
-				if reading:
-					self._notify_listeners(reading)
-			except UnicodeDecodeError as e:
-				sys.stderr.write('Decode error at Arduino: %s\n' % str(e))
+			reading = self.serial_io.readline()
+			if len(reading) == 6:
+				self._notify_listeners(reading[:-1])
 
