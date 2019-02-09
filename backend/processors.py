@@ -1,4 +1,4 @@
-import sys, logging
+import sys, logging, struct
 
 
 ''' Data processors
@@ -83,4 +83,26 @@ class PlatformWriter:
 				self.data_output.send(360)
 			else:
 				self.data_output.send(value + 90 + 180)
+
+
+class DataWriter:
+	'''
+	Write all data to binary file. Each entry should be in
+	little-endian. Name of file is the unix timestamp on system when
+	program startup.
+	'''
+	def __init__(self, readers, path='.'):
+		from time import perf_counter, time
+		self.start_time = int(perf_counter()*1000)
+		unix_timestamp = int(time())
+		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
+		for reader in readers:
+			reader.add_listener(self.write)
+
+	def write(self, packet):
+		relative_timestamp = struct.pack('<i', packet.timestamp - self.start_time)
+		self.log_file.write(packet.raw_data + relative_timestamp)
+
+	def dispose(self):
+		self.log_file.close()
 
