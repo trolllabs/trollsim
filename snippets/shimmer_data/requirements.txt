@@ -1,0 +1,3 @@
+ipython==7.3.0
+jupyter==1.0.0
+PyBluez==0.22
