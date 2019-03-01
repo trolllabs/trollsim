@@ -49,6 +49,10 @@ void loop() {
 
     switch (randomAlarm) {
       case 1: //Alarm scenario 1
+        Serial.print("Alarm 1 triggered");
+        audioAlarm(1); //play alarm sound 1
+        digitalWrite(ledPin1, HIGH); //light led1
+
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -66,83 +70,85 @@ void loop() {
             Serial.println("Button 3 was pushed, task failed.");
             break;
           }
-
-          Serial.print("Alarm 1 triggered");
-          audioAlarm(1); //play alarm sound 1
-          digitalWrite(ledPin1, HIGH); //light led1
           currentTime == millis();
         }
         if (currentTime >= limitTime) {
           Serial.println("Time ran out, task failed.");
         }
-
 
         Serial.println(currentTime);
         Serial.print(bVal1);
         Serial.print(bVal2);
         Serial.print(bVal3);
         digitalWrite(ledPin1, LOW); //darken led1
-
         break;
       case 2: //Alarm scenario 2
-        while (bVal1 == LOW && bVal2 == LOW && bVal3 == LOW && currentTime < limitTime) {
-          Serial.print("Alarm 2 triggered");
-          audioAlarm(2); //play alarm sound 2
-          digitalWrite(ledPin2, HIGH); //light led2
+        Serial.print("Alarm 2 triggered");
+        audioAlarm(2); //play alarm sound 2
+        digitalWrite(ledPin2, HIGH); //light led2
 
+        while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
           bVal3 = buttonCheck(bVal3, bPin3);
+
+          if (bVal1 == HIGH) {
+            Serial.println("Button 1 was pushed, task failed.");
+            break;
+          }
+          if (bVal2 == HIGH) {
+            Serial.println("Button 2 was pushed, task passed.");
+            break;
+          }
+          if (bVal3 == HIGH) {
+            Serial.println("Button 3 was pushed, task failed.");
+            break;
+          }
           currentTime == millis();
         }
+        if (currentTime >= limitTime) {
+          Serial.println("Time ran out, task failed.");
+        }
+
         Serial.println(currentTime);
         Serial.print(bVal1);
         Serial.print(bVal2);
         Serial.print(bVal3);
         digitalWrite(ledPin2, LOW); //darken led2
+        break;
+      case 3: //Alarm scenario 3
+        Serial.print("Alarm 3 triggered");
+        audioAlarm(3); //play alarm sound 3
+        digitalWrite(ledPin3, HIGH); //light led3
 
-        if (bVal1 == HIGH) {
-          Serial.println("Button 1 was pushed, task failed.");
-        }
-        if (bVal2 == HIGH) {
-          Serial.println("Button 2 was pushed, task passed.");
-        }
-        if (bVal3 == HIGH) {
-          Serial.println("Button 3 was pushed, task failed.");
+        while (currentTime < limitTime) {
+          bVal1 = buttonCheck(bVal1, bPin1);
+          bVal2 = buttonCheck(bVal2, bPin2);
+          bVal3 = buttonCheck(bVal3, bPin3);
+
+          if (bVal1 == HIGH) {
+            Serial.println("Button 1 was pushed, task failed.");
+            break;
+          }
+          if (bVal2 == HIGH) {
+            Serial.println("Button 2 was pushed, task failed.");
+            break;
+          }
+          if (bVal3 == HIGH) {
+            Serial.println("Button 3 was pushed, task passed.");
+            break;
+          }
+          currentTime == millis();
         }
         if (currentTime >= limitTime) {
           Serial.println("Time ran out, task failed.");
         }
-        break;
-      case 3: //Alarm scenario 3
-        while (bVal1 == LOW && bVal2 == LOW && bVal3 == LOW && currentTime < limitTime) {
-          Serial.print("Alarm 3 triggered");
-          audioAlarm(3); //play alarm sound 3
-          digitalWrite(ledPin3, HIGH); //light led3
 
-          bVal1 = buttonCheck(bVal1, bPin1);
-          bVal2 = buttonCheck(bVal2, bPin2);
-          bVal3 = buttonCheck(bVal3, bPin3);
-          currentTime == millis();
-        }
         Serial.println(currentTime);
         Serial.print(bVal1);
         Serial.print(bVal2);
         Serial.print(bVal3);
-        digitalWrite(ledPin3, LOW); //darken led3
-
-        if (bVal1 == HIGH) {
-          Serial.println("Button 1 was pushed, task failed.");
-        }
-        if (bVal2 == HIGH) {
-          Serial.println("Button 2 was pushed, task failed.");
-        }
-        if (bVal3 == HIGH) {
-          Serial.println("Button 3 was pushed, task passed.");
-        }
-        if (currentTime >= limitTime) {
-          Serial.println("Time ran out, task failed.");
-        }
+        digitalWrite(ledPin1, LOW); //darken led1
         break;
       default:
         Serial.println("error in alarm cases");
