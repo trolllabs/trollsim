@@ -1,7 +1,7 @@
-#define FLEX_ID  120
-#define ROLL_ID  121
-#define PITCH_ID 122
-#define YAW_ID   123
+#define FLEX_ID  1
+#define ROLL_ID  2
+#define PITCH_ID 3
+#define YAW_ID   4
 float flex_output;
 float roll_output;
 float pitch_output;
@@ -19,10 +19,10 @@ void write_float(char id, float value) {
 
 	byte res[packet_size];
 	res[0] = id;
-	res[1] = reading.binary[0];
-	res[2] = reading.binary[1];
-	res[3] = reading.binary[2];
-	res[4] = reading.binary[3];
+	res[1] = reading.binary[3];
+	res[2] = reading.binary[2];
+	res[3] = reading.binary[1];
+	res[4] = reading.binary[0];
 	res[5] = '\n';
 
 	Serial.write(res, packet_size);
@@ -33,10 +33,10 @@ void write_float2(char id, float value, int start_i, byte packet[]) {
 	reading.floatingPoint = value;
 
 	packet[start_i] = id;
-	packet[start_i + 1] = reading.binary[0];
-	packet[start_i + 2] = reading.binary[1];
-	packet[start_i + 3] = reading.binary[2];
-	packet[start_i + 4] = reading.binary[3];
+	packet[start_i + 1] = reading.binary[3];
+	packet[start_i + 2] = reading.binary[2];
+	packet[start_i + 3] = reading.binary[1];
+	packet[start_i + 4] = reading.binary[0];
 	packet[start_i + 5] = '\n';
 }
 
@@ -228,6 +228,7 @@ void loop(){
 	//  Serial.print(YAW_ID); Serial.print(';'); Serial.println(yaw_output);
 
 	write_all(flex_output, roll_output, pitch_output, yaw_output);
+  Serial.flush();
 	//  Serial.println(flex_output);
 	//	write_float(FLEX_ID, flex_output);
 	//	write_float(ROLL_ID, roll_output);
@@ -317,13 +318,3 @@ double remap(double value, double halfrange, bool invert) {
 	else
 		return fractionMap(value, -halfrange, halfrange, -1, 1);
 }
-
-
-
-
-
-
-
-
-
-
