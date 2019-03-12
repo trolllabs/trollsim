@@ -3,17 +3,7 @@
 		"read": {
 			"id": 0,
 			"ip": "0.0.0.0",
-			"port": 49000,
-			"ids": {
-				"1": {
-					"type": "float",
-					"dref": "sim/flightmodel/position/true_theta"
-				},
-				"2": {
-					"type": "float",
-					"dref": "sim/flightmodel/position/true_phi"
-				}
-			}
+			"port": 49005
 		},
 		"write": {
 			"id": 0,
@@ -26,45 +16,21 @@
 		"ip": "localhost",
 		"port": 8005
 	},
-	"arduino": {
-		"ehealth": {
-			"id": 100,
-			"name": "eHealth",
-			"sn": "7533832353535140E1C2",
-			"baudrate": 115200
-		},
-		"platform": {
-			"id": 110,
-			"name": "Platform Controller",
-			"sn": "85439303133351D0B002",
-			"baudrate": 115200
-		},
-		"glove": {
-			"name": "Accelerometer Glove",
-			"sn": "AH03J54W",
-			"baudrate": 115200,
-			"ids": {
-				"120": {
-					"name": "flex",
-					"type": "float",
-					"dref": "sim/test/test_float"
-				},
-				"121": {
-					"name": "roll",
-					"type": "float",
-					"dref": "sim/joystick/yoke_roll_ratio"
-				},
-				"122": {
-					"name": "pitch",
-					"type": "float",
-					"dref": "sim/joystick/yoke_pitch_ratio"
-				},
-				"123": {
-					"name": "yaw",
-					"type": "float",
-					"dref": "sim/joystick/yoke_heading_ratio"
-				}
-			}
-		}
+	"ehealth": {
+		"id": 100,
+		"name": "eHealth",
+		"sn": "7533832353535140E1C2",
+		"baudrate": 115200
+	},
+	"platform": {
+		"id": 110,
+		"name": "Platform Controller",
+		"sn": "85439303133351D0B002",
+		"baudrate": 115200
+	},
+	"glove": {
+		"name": "Accelerometer Glove",
+		"sn": "AH03J54W",
+		"baudrate": 115200
 	}
 }

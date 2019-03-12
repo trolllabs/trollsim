@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<script> // Must be placed here. Race condition?
+	const sock = new WebSocket('ws://' + window.location.hostname + ':8000');
+</script>
+
+<!-- External libs -->
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<link href="css/range.css" rel="stylesheet" type="text/css" />
+<script src="js/range.js"></script>
+<script src="js/smoothie.js"></script>
+
+<link href="css/smoothstyle.css" rel="stylesheet" type="text/css" />
+<script src="js/smoothsock.js"> </script>
+<script src="js/smoothslider.js"> </script>
+
+<div class="data-visuals">
+	<div class="graph-wrapper">
+		<div class="data-graph">
+			<canvas id="chart0" style="height: 100%; width: 100%;">
+		</div>
+	</div>
+	<div class="data-controls">
+		<div class="input-boxes">
+			<div class="ui blue range" id="slider0"></div>
+			<div class="ui input">
+				<input type="text" id="sliderinput0">
+			</div>
+		</div>
+		<div class="input-boxes">
+			<div class="ui blue range" id="slider1"></div>
+			<div class="ui input">
+				<input type="text" id="sliderinput1">
+			</div>
+		</div>
+		<div class="input-boxes">
+			<div class="ui blue range" id="slider2"></div>
+			<div class="ui input">
+				<input type="text" id="sliderinput2">
+			</div>
+		</div>
+		<div class="input-boxes">
+			<div class="ui blue range" id="slider3"></div>
+			<div class="ui input">
+				<input type="text" id="sliderinput3">
+			</div>
+		</div>
+	</div>
+</div>

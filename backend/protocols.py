@@ -1,5 +1,6 @@
 import socket, sys, serial, threading, struct
 from serial.tools import list_ports
+from misc import TrollPacket, Observable
 
 
 ''' Endpoints
@@ -13,33 +14,12 @@ calls should go through observer subscription pattern.
 '''
 
 
-class ObservableReading:
-	'''
-	Implementation of the observer pattern through callbacks. External
-	functions can read children classes through a callback handler with
-	add_listener(callback)
-	'''
-	def __init__(self):
-		self.listeners = []
-		self.lock = threading.Lock()
-
-	def add_listener(self, listener):
-		self.listeners.append(listener)
-
-	def _notify_listeners(self, message):
-		for listener in self.listeners:
-			listener(message)
-
+class ObservableReading(Observable):
 	def _read(self):
 		'''
 		Force _read implementation for children classes
 		'''
 		raise NotImplementedError('ObservableReading: No read function implemented!')
-
-	def __call__(self):
-		thread = threading.Thread(target=self._read, args=())
-		thread.start()
-		return thread
 
 
 class UDPClient(ObservableReading):
@@ -126,44 +106,38 @@ class TCPServer(ObservableReading):
 		print('TCP Server closed.')
 
 
-class Arduino(ObservableReading):
+class Serial(ObservableReading):
 	'''
 	Args:
 		config (dict): Has the keywords "id", "sn" and "baudrate" to
-			establish connection with a specific arduino.
+			establish connection with a specific serial unit.
 			The "id" keyword is the packet identifier for where a
 			reading originates from.
 			"sn" stands for serial number, which are unique for all
-			arduinos.
+			serial units.
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
 		try:
-			print('Arduino: Looking up %s..' % config['name'])
-			arduino_port = next(list_ports.grep(config['sn']))
+			print('Serial: Looking up %s..' % config['name'])
+			serial_port = next(list_ports.grep(config['sn']))
 			print('%s: Found hwid: %s at %s' \
-					% (config['name'], arduino_port.hwid, arduino_port.device))
-			self.serial_io = serial.Serial(arduino_port.device, config['baudrate'])
+					% (config['name'], serial_port.hwid, serial_port.device))
+			self.serial_io = serial.Serial(serial_port.device, config['baudrate'])
 		except StopIteration:
-			e = 'Arduino: Could not find serial %s for %s.\n' % (config['sn'], config['name'])
+			e = 'Serial: Could not find serial %s for %s.\n' % (config['sn'], config['name'])
 			sys.stderr.write(e)
 		except serial.serialutil.SerialExcepion as e:
-			e = 'Arduino error: %s\n' % str(e)
+			e = 'Serial error: %s\n' % str(e)
 			sys.stderr.write(e)
 			logging.exception(e)
 			raise Exception # Crash and burn for now
 
 	def send(self, message):
 		with self.lock:
-			try:
-				serial_message = struct.pack('>i', message)
-				self.serial_io.write(serial_message)
-			except Exception as e:
-				logging.exception(e)
+			self.serial_io.write(message)
 
 	def _read(self):
 		while True:
 			reading = self.serial_io.readline()
-			if len(reading) == 6:
-				self._notify_listeners(reading[:-1])
-
+			self._notify_listeners(reading[:-1]) # remove newline character

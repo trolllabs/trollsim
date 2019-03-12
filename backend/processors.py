@@ -21,45 +21,33 @@ class GloveMultiplier:
 
 	[glove_arduino] -> [frontend]
 	'''
-	def __init__(self, glove_arduino, frontend, data_output):
-		from misc import expected_glove_data, XPlaneDataAdapter
-		self.data_multipliers = {}
-		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
-		self.dref_names = expected_glove_data
-		self.data_output = data_output
-		glove_arduino.add_listener(self.data_sender)
-		glove_arduino.add_listener(frontend.send)
-		frontend.add_listener(self.frontend_handler)
+	def __init__(self, glove, web, xplane):
+		self.multipliers = {}
+		self.web = web
+		self.xplane = xplane
+		glove.add_listener(self.glove_handler)
+		web.add_listener(self.update_multipliers)
 
-	def frontend_handler(self, value):
-		try:
-			data = value.strip().split()
-			assert len(data) == 2
-			self.data_multipliers[int(data[0])] = float(data[1])
-		except AssertionError:
-			e = 'GloveMultiplier: Too many values, %d\n' % len(data)
-			sys.stderr.write(e)
-			logging.exception(e)
+	def update_multipliers(self, packet):
+		self.multipliers[packet.name] = packet.value
 
-	def data_sender(self, reading):
-		try:
-			glove_data = reading.split()
-			assert len(glove_data) == 4
-			glove_data = list(map(float, glove_data))
-			for i, data in enumerate(glove_data):
-				processed_data = data*self.data_multipliers.get(i, 1)
-				packet = self.packet_wrapper(processed_data, self.dref_names[i])
-				self.data_output.send(packet)
-		except AssertionError:
-			e = 'Dimension mismatch:%s|%s\n' % (reading, self.data_multipliers)
-			sys.stderr.write(e)
-		except ValueError:
-			e = 'GloveMultiplier: Unclean reading, %s\n' % glove_data
-			sys.stderr.write(e)
+	def glove_handler(self, packet):
+		self.xplane.write(packet*self.multipliers.get(packet.name, 1))
+		self.web.write(packet)
+
+
+class DREFTunnel:
+	def __init__(self, xplane, web):
+		self.web = web
+		xplane.add_listener(self.sendto_web)
+
+	def sendto_web(self, packet):
+		self.web.write(packet)
 
 
 class PlatformWriter:
 	'''
+	Deprecated, possibly nonfunctional
 	Reads from xplane before passing it onto the platform arduino
 
 	[xplane] -> [PlatformWriter] -> [platform_arduino]
@@ -88,20 +76,21 @@ class PlatformWriter:
 class DataWriter:
 	'''
 	Write all data to binary file. Each entry should be in
-	little-endian. Name of file is the unix timestamp on system when
-	program startup.
+	big-endian. Name of file is the unix timestamp on system when
+	program start up.
 	'''
-	def __init__(self, readers, path='.'):
+	def __init__(self, *args, path='.'):
 		from time import perf_counter, time
 		self.start_time = int(perf_counter()*1000)
 		unix_timestamp = int(time())
 		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
-		for reader in readers:
-			reader.add_listener(self.write)
+		for arg in args:
+			arg.add_listener(self.write)
 
 	def write(self, packet):
-		relative_timestamp = struct.pack('<i', packet.timestamp - self.start_time)
-		self.log_file.write(packet.raw_data + relative_timestamp)
+		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
+		self.log_file.write(packet.binary + relative_timestamp)
+		self.log_file.flush()
 
 	def dispose(self):
 		self.log_file.close()

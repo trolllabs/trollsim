@@ -1,6 +1,6 @@
 import sys, logging, threading, json, argparse
-from endpoints import UDPClient, UDPServer, TCPServer, Arduino
-from processors import GloveMultiplier, PlatformWriter
+from components import XPlane, WebUI, Glove
+from processors import GloveMultiplier, PlatformWriter, DataWriter, DREFTunnel
 
 
 class ArgparseHelper(argparse.ArgumentParser):
@@ -13,40 +13,50 @@ class ArgparseHelper(argparse.ArgumentParser):
 parser = ArgparseHelper()
 parser.add_argument('-f','--file', type=str, default='config.json',
 		help='Set the path of config file. Default is config.json in working directory.')
+parser.add_argument('-m','--meta', type=str, default='metadata.json',
+		help='Set the path of metadata file. Default is metadata.json in working directory.')
+parser.add_argument('-s', '--save', action='store_true', default=False,
+		help='Save current session to a logfile.') # Specify where it will be written
 args = parser.parse_args()
+
+
+def load_configs(args):
+	with open(args.file, 'r') as f:
+		component_config = json.load(f)
+	with open(args.meta, 'r') as f:
+		metadata_config = json.load(f)
+	return {'component': component_config, 'metadata': metadata_config}
+
+
+def run_threads(threads):
+	for thread in threads:
+		thread.start()
+
+	# Wait for threads to terminate
+	for thread in threads:
+		thread.join()
 
 
 def main():
 	# Define headers.
 	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
+	config = load_configs(args)
 	threads = []
 
-	with open(args.file, 'r') as f:
-		config = json.load(f)
+	xplane = XPlane(config)
+	web = WebUI(config)
+	glove = Glove(config)
 
-	# Initialize local endpoints and also connecting to external endpoints
-	xplane_writesocket = UDPClient(config['xplane']['write'])
-	xplane_readsocket = UDPServer(config['xplane']['read'])
-	frontend_socket = TCPServer(config['frontend'])
-	glove_arduino = Arduino(config['arduino']['glove'])
-	ehealth_arduino = Arduino(config['arduino']['ehealth'])
-	platform_arduino = Arduino(config['arduino']['platform'])
+	threads.append(xplane)
+	threads.append(web)
+	threads.append(glove)
+
+	gm = GloveMultiplier(glove, web, xplane)
+	dt = DREFTunnel(xplane, web)
+	logger = DataWriter(xplane)
 
 
-	# Initialize processing logic and connect internal endpoints
-	glove_processor = GloveMultiplier(glove_arduino, frontend_socket, xplane_writesocket)
-	platform = PlatformWriter(xplane_readsocket, platform_arduino)
-
-	# Initialize new threads for datareading components
-	threads.append(glove_arduino())
-	threads.append(ehealth_arduino())
-	threads.append(frontend_socket())
-	threads.append(xplane_readsocket())
-	threads.append(platform_arduino())
-
-	# Wait for threads to terminate (will never happen)
-	for thread in threads:
-		thread.join()
+	run_threads(threads)
 
 
 if __name__ == "__main__":

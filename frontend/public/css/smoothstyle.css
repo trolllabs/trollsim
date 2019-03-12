@@ -1,0 +1,38 @@
+body {
+	background-color: #F9FAFB
+}
+.data-visuals {
+	display: flex;
+	flex-direction: row;
+	width: 80vw;
+	height: 80vh;
+	justify-content: center;
+}
+.data-graph {
+	width: 60vw;
+	height: 40vh;
+}
+.data-controls {
+	display: flex;
+	justify-content: space-evenly;
+	flex-direction: column;
+	width: 10vw;
+	height: 40vh;
+}
+.input-boxes {
+	display: flex;
+	flex-direction: row;
+	//width: 500px;
+}
+div.smoothie-chart-tooltip {
+	background: #666;
+	padding: 1em;
+	margin-top: 20px;
+	font-family: helvetica;
+	color: white;
+	font-size: 10px;
+	pointer-events: none;
+}
+input[id^="sliderinput"] {
+	width: 2em;
+}

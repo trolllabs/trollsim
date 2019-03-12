@@ -1,0 +1,28 @@
+0;xplane begin;NULL
+1;sim/cockpit2/engine/actuators/throttle_ratio_all;float
+2;sim/joystick/yoke_roll_ratio;float
+3;sim/joystick/yoke_pitch_ratio;float
+4;sim/joystick/yoke_heading_ratio;float
+5;sim/test/test_float;float
+50;frontend begin;NULL
+51;Throttle slider;float
+52;Roll slider;float
+53;Pitch slider;float
+54;Yaw slider;float
+100;arduino begin;NULL
+120;Glove flex;float
+121;Glove roll;float
+122;Glove pitch;float
+123;Glove yaw;float
+200;imotions begin;NULL
+201;GSR RAW (no units);int
+202;GSR CAL (kOhms);float
+203;GSR CAL (μSiemens);float
+210;ECG LL-RA RAW (no units);NULL
+211;ECG LL-RA CAL (mVolts);NULL
+212;ECG LA-RA RAW (no units);NULL
+213;ECG LA-RA CAL (mVolts);NULL
+214;ECG Vx-RL RAW (no units);NULL
+215;ECG Vx-RL CAL (mVolts);NULL
+216;Heart Rate ECG LL-RA (Beats/min);NULL
+217;IBI ECG LL-RA (mSecs);NULL

@@ -13,29 +13,34 @@
 	//var chart2 = new Chartist.Line('#chart2', linedata2, options);
 	//var chart3 = new Chartist.Line('#chart3', linedata3, options);
 	//var chart4 = new Chartist.Line('#chart4', linedata4, options);
-	const logger = document.getElementById('log');
+	//const logger = document.getElementById('log');
 
-	function printData(e) {
-		logger.innerHTML = e.data + "\n";
-	}
+	//function printData(e) {
+	//	logger.innerHTML = e.data + "\n";
+	//}
 
 	function updateGraph(e) {
 		data = e.data.trim().split(' ')
-		series1.splice(0, 1);
+		if (data[0] == 1) {
+			series1.splice(0, 1);
+			series1.push(data[1]);
+			chart1.update({series: [series1], labels: labels}, null, false);
+		}
+		//series1.splice(0, 1);
 		//series2.splice(0, 1);
 		//series3.splice(0, 1);
 		//series4.splice(0, 1);
-		series1.push(data[0]);
+		//series1.push(data[0]);
 		//series2.push(data[1]);
 		//series3.push(data[2]);
 		//series4.push(data[3]);
-		chart1.update({series: [series1], labels: labels}, null, false);
+		//chart1.update({series: [series1], labels: labels}, null, false);
 		//chart2.update({series: [series2], labels: labels}, null, false);
 		//chart3.update({series: [series3], labels: labels}, null, false);
 		//chart4.update({series: [series4], labels: labels}, null, false);
 	}
 
-	sock.addEventListener('message', printData);
+	//sock.addEventListener('message', printData);
 	sock.addEventListener('message', updateGraph);
 
 	function sendMessage() {
