@@ -3,27 +3,61 @@
 		"read": {
 			"id": 0,
 			"ip": "0.0.0.0",
-			"port": 49005
+			"port": 49005,
+			"r-ip": "127.0.0.1",
+			"r-port": 49000,
+			"buffer-size": 509
 		},
 		"write": {
 			"id": 0,
 			"ip": "127.0.0.1",
-			"port": 49000
+			"port": 49000,
+			"buffer-size": 1024
 		}
 	},
 	"frontend": {
 		"id": 50,
 		"ip": "localhost",
-		"port": 8005
+		"port": 8005,
+		"buffer-size": 1024
+	},
+	"shimmer-gsr": {
+		"name": "Shimmer3-C6F2",
+		"MAC": "00:06:66:D7:C6:F2",
+		"buffer-size": 1
+	},
+	"shimmer-ecg": {
+		"name": "Shimmer3-DACF",
+		"MAC": "00:06:66:88:DA:CF",
+		"buffer-size": 1
+	},
+	"imotions": {
+		"ip": "localhost",
+		"port": 5050,
+		"sensors": {
+			"Shimmer/GSR": {
+				"18": 201,
+				"19": 202,
+				"22": 203
+			},
+			"Shimmer/ECG": {
+				"17": 210,
+				"18": 211,
+				"19": 212,
+				"20": 213,
+				"22": 214,
+				"23": 215,
+				"24": 216,
+				"25": 217
+			}
+		}
 	},
 	"ehealth": {
-		"id": 100,
 		"name": "eHealth",
 		"sn": "7533832353535140E1C2",
 		"baudrate": 115200
 	},
 	"platform": {
-		"id": 110,
 		"name": "Platform Controller",
 		"sn": "85439303133351D0B002",
 		"baudrate": 115200
