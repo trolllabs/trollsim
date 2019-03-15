@@ -1,5 +1,5 @@
 import sys, logging, threading, json, argparse
-from components import XPlane, WebUI, Glove
+from endpoints import XPlane, WebUI, Glove
 from processors import GloveMultiplier, PlatformWriter, DataWriter, DREFTunnel
 
 
