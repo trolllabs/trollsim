@@ -58,8 +58,9 @@ class WebUI(ObservableComponent):
 	def __init__(self, config):
 		self.frontend = TCPServer(config['component']['frontend'])
 		self.frontend.add_listener(self.parse_data)
-		self.frontend.send(json.dumps(config['metadata']).encode('utf-8'))
 		ObservableComponent.__init__(self, config['metadata'], self.frontend)
+
+		self.frontend.send(json.dumps(config['metadata']).encode('utf-8'))
 
 	def write(self, trollpacket):
 		self.frontend.send(trollpacket.binary)
