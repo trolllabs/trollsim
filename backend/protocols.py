@@ -15,11 +15,20 @@ calls should go through observer subscription pattern.
 
 
 class ObservableReading(Observable):
+	'''
+	Force method implementation for children classes
+	'''
+	def connect(self):
+		raise NotImplementedError('ObservableReading: No connect function implemented!')
+
+	def send(self):
+		raise NotImplementedError('ObservableReading: No send function implemented!')
+
 	def _read(self):
-		'''
-		Force _read implementation for children classes
-		'''
 		raise NotImplementedError('ObservableReading: No read function implemented!')
+
+	def close(self):
+		raise NotImplementedError('ObservableReading: No close function implemented!')
 
 
 class UDPClient(ObservableReading):
