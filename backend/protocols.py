@@ -1,4 +1,4 @@
-import socket, sys, serial, threading, struct
+import socket, sys, serial, threading, struct, bluetooth
 from serial.tools import list_ports
 from misc import TrollPacket, Observable
 
@@ -32,17 +32,20 @@ class UDPClient(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.address = (config['ip'], config['port'])
+		self.config = config
+		self.address = (self.config['ip'], self.config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+	def connect(self):
+		pass # Does not need to
 
 	def send(self, message):
 		with self.lock:
 			self.sock.sendto(message, self.address)
 
 	def _read(self):
-		while True:
-			data = self.sock.recv(1024)
-			self._notify_listeners(data)
+		data = self.sock.recv(self.config['buffer-size'])
+		self._notify_listeners(data)
 
 
 class UDPServer(ObservableReading):
@@ -55,20 +58,23 @@ class UDPServer(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		self.address = (config['ip'], config['port'])
+		self.config = config
+		self.address = (self.config['r-ip'], self.config['r-port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		print('UDP server listening at %s %s' % self.address)
-		self.sock.bind(self.address)
+		self.sock.bind((config['ip'], config['port']))
+		print('UDP server listening at %s %s' % (config['ip'], config['port']))
 
-	def send(self, message, addr):
+	def connect(self):
+		pass # Does not need to
+
+	def send(self, message):
 		with self.lock:
-			self.sock.sendto(message, addr)
+			self.sock.sendto(message, self.address)
 
 	def _read(self):
-		while True:
-			data, addr = self.sock.recvfrom(509)
-			self._notify_listeners(data)
+		data, addr = self.sock.recvfrom(self.config['buffer-size'])
+		self._notify_listeners(data)
 
 
 class TCPServer(ObservableReading):
@@ -83,23 +89,26 @@ class TCPServer(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
+		self.config = config
 		self.address = (config['ip'], config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		print('TCP server listening to frontend at %s %s' % self.address)
+		print('TCP server listening to %s %s' % self.address)
 		self.sock.bind(self.address)
 		self.sock.listen(1)
+
+	def connect(self):
 		self.conn, self.addr = self.sock.accept()
+		print('TCPServer: new connection', self.addr)
 
 	def send(self, message):
 		with self.lock:
 			self.conn.send(message)
 
 	def _read(self):
-		while True:
-			data = self.conn.recv(1024)
-			if not data: raise ConnectionError('Broken pipe, no more data received')
-			self._notify_listeners(data)
+		data = self.conn.recv(self.config['buffer-size'])
+		if not data: raise ConnectionError('Broken pipe, no more data received')
+		self._notify_listeners(data)
 
 	def close(self):
 		self.sock.close()
@@ -118,26 +127,59 @@ class Serial(ObservableReading):
 	'''
 	def __init__(self, config):
 		ObservableReading.__init__(self)
-		try:
-			print('Serial: Looking up %s..' % config['name'])
-			serial_port = next(list_ports.grep(config['sn']))
-			print('%s: Found hwid: %s at %s' \
-					% (config['name'], serial_port.hwid, serial_port.device))
-			self.serial_io = serial.Serial(serial_port.device, config['baudrate'])
-		except StopIteration:
-			e = 'Serial: Could not find serial %s for %s.\n' % (config['sn'], config['name'])
-			sys.stderr.write(e)
-		except serial.serialutil.SerialExcepion as e:
-			e = 'Serial error: %s\n' % str(e)
-			sys.stderr.write(e)
-			logging.exception(e)
-			raise Exception # Crash and burn for now
+		self.config = config
+
+	def connect(self):
+		while True:
+			try:
+				print('Serial: Looking up %s..' % self.config['name'])
+				serial_port = next(list_ports.grep(self.config['sn']))
+				print('%s: Found hwid: %s at %s' \
+						% (self.config['name'], serial_port.hwid, serial_port.device))
+				self.serial_io = serial.Serial(serial_port.device, self.config['baudrate'])
+				return
+			except StopIteration:
+				e = 'Serial: Could not find serial %s for %s.\n' % (self.config['sn'], self.config['name'])
+				sys.stderr.write(e)
+			except serial.serialutil.SerialExcepion as e:
+				e = 'Serial error: %s\n' % str(e)
+				sys.stderr.write(e)
+				logging.exception(e)
+				raise Exception # Crash and burn for now
+			print('Could not establish connection. Retrying.')
+			sleep(2)
 
 	def send(self, message):
 		with self.lock:
 			self.serial_io.write(message)
 
 	def _read(self):
+		reading = self.serial_io.readline()
+		self._notify_listeners(reading[:-1]) # remove newline character
+
+
+class Bluetooth(ObservableReading):
+	def __init__(self, config):
+		ObservableReading.__init__(self)
+		self.config = config
+		self.bt_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+
+	def connect(self):
 		while True:
-			reading = self.serial_io.readline()
-			self._notify_listeners(reading[:-1]) # remove newline character
+			try:
+				print('Bluetooth: Connecting to %s..' % self.config['name'])
+				self.bt_sock.connect((self.config['mac'], 1))
+				return
+			except bluetooth.BluetoothError as e:
+				print('Bluetooth error: ', e)
+				print('Retrying')
+			sleep(2)
+
+	def send(self, message):
+		with self.lock:
+			self.bt_sock.send(message)
+
+	def _read(self):
+		reading = self.bt_sock.recv(self.config['buffer-size'])
+		self._notify_listeners(reading)
+

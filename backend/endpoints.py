@@ -1,6 +1,6 @@
 import struct, json
 from threading import Thread
-from protocols import UDPClient, UDPServer, TCPServer, Serial
+from protocols import UDPClient, UDPServer, TCPServer, Serial, Bluetooth
 from misc import Observable, type_lookup, XPlaneDataAdapter, PacketFactory
 
 
@@ -10,14 +10,14 @@ class ObservableComponent(Observable, Thread):
 		Thread.__init__(self)
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
+		self.data_source.connect()
 
-	#@property.setter
-	#def source(self, new_source):
-	#	self.data_source.destroy
-	#	self.data_source = new_source
+	def parse_data(self):
+		raise NotImplementedError('ObservableComponent: No parse function implemented!')
 
 	def run(self):
-		self.data_source._read()
+		while True:
+			self.data_source._read()
 
 
 class XPlane(ObservableComponent):
