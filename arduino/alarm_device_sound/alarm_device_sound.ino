@@ -1,4 +1,4 @@
-
+//hei
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
 int alarms = 10; //number of alarms that will be triggered in total before device becomes inactive again

@@ -5,7 +5,7 @@ Servo myservo;  // create servo object to control a servo
 int val = 0; //value to be randomized
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
-int alarms = 10; //number of alarms that will be triggered in total before device becomes inactive again
+int alarms = 100; //number of alarms that will be triggered in total before device becomes inactive again
 int currentAlarm = 0; //counter counting how many alarms have happened
 int minPeriod = 0; // input in seconds here minimum time period between alarms
 int maxPeriod = 10; // input in seconds here maximum time period between alarms
@@ -65,7 +65,7 @@ void loop() {
         startTime = millis();
         digitalWrite(ledPin1, HIGH); //light led1
         //audioAlarm(1); //play alarm sound 1
-        smellAlarm(0); //trigger smell alarm 1
+        smellAlarm(1); //trigger smell alarm 1
 
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
@@ -187,7 +187,7 @@ void loop() {
 
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
     currentAlarm = currentAlarm + 1; //Increments alarm counter by 1
-    smellAlarm(1); //trigger smell alarm 0
+    smellAlarm(0); //trigger smell alarm 0
     Serial.print("This was alarm number: ");
     Serial.println(currentAlarm);
     Serial.println("---------------------------");
@@ -215,28 +215,28 @@ bool buttonCheck(bool bValX, int buttonPinX) {
 void smellAlarm(int randomAlarm) {
   switch (randomAlarm) {
     case 1: //Alarm scenario 1
-      Serial.println("smellAlarm 1 triggered");
+      //Serial.println("smellAlarm 1 triggered");
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
-      myservo.write(60);
+      myservo.write(1);
       break;
     case 2: //Alarm secnario 2
-      Serial.println("smellAlarm 2 triggered");
+      //Serial.println("smellAlarm 2 triggered");
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
       myservo.write(120);
       break;
     case 3: //ALarm scenario 3
-      Serial.println("smellAlarm 3 triggered");
+      //Serial.println("smellAlarm 3 triggered");
       digitalWrite(in1, HIGH);
       digitalWrite(in2, LOW);
       myservo.write(180);
       break;
     default:
-      Serial.println("Returned to 0");
+      //Serial.println("Returned to 0");
       digitalWrite(in1, LOW);
       digitalWrite(in2, HIGH);
-      myservo.write(0);
+      myservo.write(60);
       break;
   }
 }
