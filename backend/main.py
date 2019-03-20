@@ -24,7 +24,7 @@ args = parser.parse_args()
 def load_configs(args):
 	with open(args.file, 'r') as f:
 		component_config = json.load(f)
-	metadata_config = metadata_config(args.meta)
+	metadata_config = metadata_parser(args.meta)
 	return {'component': component_config, 'metadata': metadata_config}
 
 
