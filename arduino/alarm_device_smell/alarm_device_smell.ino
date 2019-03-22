@@ -1,3 +1,42 @@
+const int packet_size = 6;
+
+typedef union {
+  float floatingPoint;
+  byte binary[4];
+} binaryFloat;
+
+void write_float(char id, float value) {
+  binaryFloat reading;
+  reading.floatingPoint = value;
+
+  byte res[packet_size];
+  res[0] = id;
+  res[1] = reading.binary[3];
+  res[2] = reading.binary[2];
+  res[3] = reading.binary[1];
+  res[4] = reading.binary[0];
+  res[5] = '\n';
+
+  Serial.write(res, packet_size);
+}
+
+void write_long(char id, long value32) {
+  byte res[packet_size];
+  res[0] = id;
+  res[1] = (value32 >> 24) & 0xFF;
+  res[2] = (value32 >> 16) & 0xFF;
+  res[3] = (value32 >> 8)  & 0xFF;
+  res[4] = value32 & 0xFF;
+  res[5] = '\n';
+
+  Serial.write(res, packet_size);
+}
+
+void write_int(char id, int value16) {
+  long value32 = (long) value16;
+  write_long(id, value32);
+}
+
 #include <Servo.h>
 #define in1 11 //first pin for fan control
 #define in2 12 // second pin for fan controol
@@ -22,7 +61,7 @@ int alarms = 10; //number of alarms that will be triggered in total before devic
 int currentAlarm = 0; //counter counting how many alarms have happened
 int minPeriod = 1000; // input in seconds here minimum time period between alarms
 int maxPeriod = 4000; // input in seconds here maximum time period between
-int rVal=0;
+int rVal = 0;
 
 unsigned long currentTime = 0; //var to store current time using millis(), to be updated throughout
 unsigned long startTime = 0; //time when alarm starts
@@ -43,28 +82,39 @@ void setup() {
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
   myservo.attach(10);  // attaches the servo on pin 10 to the servo object
-  Serial.begin(9600);
+  Serial.begin(115200);
   randomSeed(analogRead(0));
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  //  Writing float:
+  //  write_float(0xAA, 123.4141);
+
+  //  Writing integer:
+  //  write_int(0xAA, 5234);
+
+
   active = digitalRead(activePin); //Read value of on-switch
   if (active == HIGH && currentAlarm < alarms) {
-    Serial.println("Device armed");
+    write_int(11, 1); //informs of alarm type being smell
+    write_int(12, 1); //Sends alarm=armed
+
   }
 
   while (active == HIGH && currentAlarm < alarms) {      //Condition to execute when device is on/armed.
+    ++currentAlarm; //Increments alarm counter by 1
+    write_int(13, currentAlarm); //Sends alarm number
+
     currentTime = millis(); //reading of current time
     randomPeriod = random(minPeriod, maxPeriod); //randomized waiting time untill first alarm is triggered
     limitTime = currentTime + randomPeriod + alarmPeriod; //time where alarm task is failed due to no action
     delay(randomPeriod);
-    rVal=random(1,4);
-    Serial.println(rVal);
-    switch (rVal){
+    rVal = random(1, 4);
+    switch (rVal) {
       case 1: //Alarm scenario 1
-        Serial.println("Alarm 1 triggered");
+        write_int(14, rVal); //Sends ID of the triggeder alarm
         startTime = millis();
         digitalWrite(ledPin1, HIGH); //light led1
         smellAlarm(1); //trigger smell alarm 1
@@ -73,22 +123,23 @@ void loop() {
           bVal2 = buttonCheck(bVal2, bPin2);
           bVal3 = buttonCheck(bVal3, bPin3);
           if (bVal1 == HIGH) {
-            Serial.println("Correct button - PASS");
+            write_int(15, 1); //Sends result of alarm test being passed
             break;
           }
           if (bVal2 == HIGH || bVal3 == HIGH) {
-            Serial.println("Wrong button - FAIL");
+            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
           if (currentTime >= limitTime) {
-            Serial.println("Time ran out, task failed.");
+            write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
         digitalWrite(ledPin1, LOW); //darken led1
         break;
       case 2: //Alarm scenario 1
-        Serial.println("Alarm 2 triggered");
+        write_int(14, rVal); //Sends ID of the triggeder alarm
+        //Serial.println("Alarm 2 triggered");
         startTime = millis();
         digitalWrite(ledPin2, HIGH); //light led2
         smellAlarm(2); //trigger smell alarm 2
@@ -97,22 +148,23 @@ void loop() {
           bVal2 = buttonCheck(bVal2, bPin2);
           bVal3 = buttonCheck(bVal3, bPin3);
           if (bVal2 == HIGH) {
-            Serial.println("Correct button - PASS");
+            write_int(15, 1); //Sends result of alarm test being passed
             break;
           }
           if (bVal1 == HIGH || bVal3 == HIGH) {
-            Serial.println("Wrong button - FAIL");
+            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
           if (currentTime >= limitTime) {
-            Serial.println("Time ran out, task failed.");
+            write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
         digitalWrite(ledPin2, LOW); //darken led2
         break;
       case 3: //Alarm scenario 3
-        Serial.println("Alarm 3 triggered");
+        write_int(14, rVal); //Sends ID of the triggeder alarm
+        //Serial.println("Alarm 3 triggered");
         startTime = millis();
         digitalWrite(ledPin3, HIGH); //light led3
         smellAlarm(3); //trigger smell alarm 3
@@ -121,32 +173,31 @@ void loop() {
           bVal2 = buttonCheck(bVal2, bPin2);
           bVal3 = buttonCheck(bVal3, bPin3);
           if (bVal3 == HIGH) {
-            Serial.println("Correct button - PASS");
+            write_int(15, 1); //Sends result of alarm test being passed
             break;
           }
           if (bVal1 == HIGH || bVal2 == HIGH) {
-            Serial.println("Wrong button - FAIL");
+            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
           if (currentTime >= limitTime) {
-            Serial.println("Time ran out, task failed.");
+            write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
         digitalWrite(ledPin3, LOW); //darken led2
         break;
       default:
-        Serial.println("error in alarm cases");
+        write_int(15, rVal); //Sends that alarm number was invalid
+        //Serial.println("error in alarm cases");
         break;
     }
-
-
-    ++currentAlarm; //Increments alarm counter by 1
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
     smellAlarm(0); //Put smell cartridge in neutral position
   }
 
-  Serial.println("Device disarmed");
+  //Serial.println("Device disarmed");
+  write_int(12, 0); //Sends alarm=disarmed
   delay(3000);
   if (active == LOW) {
     currentAlarm = 0;
