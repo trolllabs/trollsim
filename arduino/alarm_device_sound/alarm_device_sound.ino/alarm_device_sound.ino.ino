@@ -1,4 +1,3 @@
-
 const int packet_size = 6;
 
 typedef union {
@@ -38,10 +37,8 @@ void write_int(char id, int value16) {
   write_long(id, value32);
 }
 
-#include <Servo.h>
-#define in1 11 //first pin for fan control
-#define in2 12 // second pin for fan controol
-Servo myservo;  // create servo object to control a servo
+#include <Wire.h>
+
 
 int bPin1 = 2; //pin number 1st button
 int bPin2 = 3; //pin number 2nd button
@@ -52,9 +49,7 @@ bool bVal3 = LOW; //value read from button 3
 int ledPin1 = 5;  //pin number 1st led
 int ledPin2 = 6;  //pin number 2nd led
 int ledPin3 = 7;  //pin number 3rd led
-//int speakerPin = 9; //pin number speaker
 int activePin = 8; //digital pin triggering device on/off.
-int smellPin = 10; //pin for servo controlling smell device
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
 
@@ -62,7 +57,8 @@ int alarms = 10; //number of alarms that will be triggered in total before devic
 int currentAlarm = 0; //counter counting how many alarms have happened
 int minPeriod = 1000; // input in seconds here minimum time period between alarms
 int maxPeriod = 4000; // input in seconds here maximum time period between
-int rVal = 0;
+
+byte rVal = 0;
 
 unsigned long currentTime = 0; //var to store current time using millis(), to be updated throughout
 unsigned long startTime = 0; //time when alarm starts
@@ -82,8 +78,9 @@ void setup() {
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
-  myservo.attach(10);  // attaches the servo on pin 10 to the servo object
   Serial.begin(115200);
+  
+  Wire.begin(); //join i2c bus 
   randomSeed(analogRead(0));
 
 }
@@ -99,7 +96,7 @@ void loop() {
 
   active = digitalRead(activePin); //Read value of on-switch
   if (active == HIGH && currentAlarm < alarms) {
-    write_int(11, 1); //informs of alarm type being smell
+    write_int(11, 0); //informs of alarm type being sound
     write_int(12, 1); //Sends alarm=armed
 
   }
@@ -118,7 +115,7 @@ void loop() {
         write_int(14, rVal); //Sends ID of the triggeder alarm
         startTime = millis();
         digitalWrite(ledPin1, HIGH); //light led1
-        smellAlarm(1); //trigger smell alarm 1
+        soundAlarm(1); //trigger sound alarm 1
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -143,7 +140,7 @@ void loop() {
         //Serial.println("Alarm 2 triggered");
         startTime = millis();
         digitalWrite(ledPin2, HIGH); //light led2
-        smellAlarm(2); //trigger smell alarm 2
+        soundAlarm(2); //trigger sound alarm 2
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -168,7 +165,7 @@ void loop() {
         //Serial.println("Alarm 3 triggered");
         startTime = millis();
         digitalWrite(ledPin3, HIGH); //light led3
-        smellAlarm(3); //trigger smell alarm 3
+        soundAlarm(3); //trigger sound alarm 3
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -194,7 +191,7 @@ void loop() {
         break;
     }
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
-    smellAlarm(0); //Put smell cartridge in neutral position
+    soundAlarm(0); //stop soundalarm
   }
 
   //Serial.println("Device disarmed");
@@ -217,31 +214,8 @@ bool buttonCheck(bool bValX, int buttonPinX) {
   return newBValX;
 }
 
-void smellAlarm(int smellAlarmNumber) {
-  switch (smellAlarmNumber) {
-    case 1: //Alarm scenario 1
-      //Serial.println("smellAlarm 1 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(1);
-      break;
-    case 2: //Alarm secnario 2
-      //Serial.println("smellAlarm 2 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(120);
-      break;
-    case 3: //ALarm scenario 3
-      //Serial.println("smellAlarm 3 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(180);
-      break;
-    default:
-      //Serial.println("Returned to 0");
-      digitalWrite(in1, LOW);
-      digitalWrite(in2, HIGH);
-      myservo.write(60);
-      break;
-  }
+void soundAlarm(byte soundAlarmNumber) {
+  Wire.beginTransmission(1); ///transmit   to device #1
+  Wire.write(soundAlarmNumber);
+  Wire.endTransmission(); 
 }

@@ -1,12 +1,18 @@
+
+
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
-int alarms = 0; //number of alarms that will be triggered in total before device becomes inactive again
+int alarms = 10; //number of alarms that will be triggered in total before device becomes inactive again
+int currentAlarm = 0; //counter counting how many alarms have happened
 int minPeriod = 0; // input in seconds here minimum time period between alarms
 int maxPeriod = 10; // input in seconds here maximum time period between alarms
+int randomAlarm=0;
 
 long currentTime = 0; //var to store current time using millis(), to be updated throughout
+long startTime = 0; //time when alarm starts
+long responseTime = 0; //response time to react to alarm
 long alarmPeriod = 20000; //var in milliseconds that decides how long the alarm should sound before alarm task is failed due to no action.
 
-int activePin = 1; //digital pin triggering device on/off.
+int activePin = 9; //digital pin triggering device on/off.
 int bPin1 = 2; //pin number 1st button
 int bPin2 = 3; //pin number 2nd button
 int bPin3 = 4; //pin number 3rd button
@@ -37,21 +43,24 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   active = digitalRead(activePin); //Read value of on-switch
-  while (active == HIGH) {        //Condition to execute when device is on/armed.
-    Serial.print("Device armed");
+  if (active == HIGH) {
+    Serial.println("Device armed");
+  }
+  while (active == HIGH && currentAlarm < alarms) {      //Condition to execute when device is on/armed.
     currentTime = millis(); //reading of current time
 
     long randomPeriod = random(minPeriod, maxPeriod); //randomized waiting time untill first alarm is triggered
 
     long limitTime = currentTime + randomPeriod + alarmPeriod; //time where alarm task is failed due to no action
-    int randomAlarm = random(1, 3);
+    randomAlarm = random(1, 4);
     delay(1000 * randomPeriod);
 
     switch (randomAlarm) {
       case 1: //Alarm scenario 1
-        Serial.print("Alarm 1 triggered");
-        audioAlarm(1); //play alarm sound 1
+        Serial.println("Alarm 1 triggered");
+        startTime = millis();
         digitalWrite(ledPin1, HIGH); //light led1
+        audioAlarm(1); //play alarm sound 1
 
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
@@ -70,23 +79,27 @@ void loop() {
             Serial.println("Button 3 was pushed, task failed.");
             break;
           }
+          responseTime = millis() - startTime;
           currentTime == millis();
         }
         if (currentTime >= limitTime) {
           Serial.println("Time ran out, task failed.");
         }
-
-        Serial.println(currentTime);
+        Serial.print("Response time: ");
+        Serial.println(responseTime);
+        Serial.print("Button values: ");
         Serial.print(bVal1);
+        Serial.print(", ");
         Serial.print(bVal2);
-        Serial.print(bVal3);
+        Serial.print(", ");
+        Serial.println(bVal3);
         digitalWrite(ledPin1, LOW); //darken led1
         break;
       case 2: //Alarm scenario 2
-        Serial.print("Alarm 2 triggered");
-        audioAlarm(2); //play alarm sound 2
+        Serial.println("Alarm 2 triggered");
+        startTime = millis();
         digitalWrite(ledPin2, HIGH); //light led2
-
+        audioAlarm(2); //play alarm sound 2
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -104,22 +117,27 @@ void loop() {
             Serial.println("Button 3 was pushed, task failed.");
             break;
           }
+          responseTime = millis() - startTime;
           currentTime == millis();
         }
         if (currentTime >= limitTime) {
           Serial.println("Time ran out, task failed.");
         }
-
-        Serial.println(currentTime);
+        Serial.print("Time: ");
+        Serial.println(responseTime);
+        Serial.print("Button values: ");
         Serial.print(bVal1);
+        Serial.print(", ");
         Serial.print(bVal2);
-        Serial.print(bVal3);
+        Serial.print(", ");
+        Serial.println(bVal3);
         digitalWrite(ledPin2, LOW); //darken led2
         break;
       case 3: //Alarm scenario 3
-        Serial.print("Alarm 3 triggered");
-        audioAlarm(3); //play alarm sound 3
+        Serial.println("Alarm 3 triggered");
+        startTime = millis();
         digitalWrite(ledPin3, HIGH); //light led3
+        audioAlarm(3); //play alarm sound 3
 
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
@@ -139,16 +157,20 @@ void loop() {
             break;
           }
           currentTime == millis();
+          responseTime = millis() - startTime;
         }
         if (currentTime >= limitTime) {
           Serial.println("Time ran out, task failed.");
         }
-
-        Serial.println(currentTime);
+        Serial.print("Time: ");
+        Serial.println(responseTime);
+        Serial.print("Button values: ");
         Serial.print(bVal1);
+        Serial.print(", ");
         Serial.print(bVal2);
-        Serial.print(bVal3);
-        digitalWrite(ledPin1, LOW); //darken led1
+        Serial.print(", ");
+        Serial.println(bVal3);
+        digitalWrite(ledPin3, LOW); //darken led3
         break;
       default:
         Serial.println("error in alarm cases");
@@ -157,9 +179,16 @@ void loop() {
 
 
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
+    currentAlarm = currentAlarm + 1; //Increments alarm counter by 1
+    Serial.print("This was alarm number: ");
+    Serial.println(currentAlarm);
+    Serial.println("---------------------------");
   }
-  Serial.print("Device disarmed");
+  Serial.println("Device disarmed");
   delay(3000);
+  if (active == LOW) {
+    currentAlarm = 0;
+  }
 
 }
 
@@ -179,18 +208,17 @@ void audioAlarm(int alarmNumber) {
   if (alarmNumber == 1) {
     //Alarm 1
     tone(speakerPin, 440, 200);
-    delay(1000);
+    delay(200);
     tone(speakerPin, 200, 200);
-    delay(1000);
+    delay(200);
     tone(speakerPin, 100, 200);
-    delay(1000);
   }
   if (alarmNumber == 2) {
     //Alarm 2
     tone(speakerPin, 100, 50);
-    delay(1000);
+    delay(200);
     tone(speakerPin, 200, 50);
-    delay(1000);
+    delay(200);
     tone(speakerPin, 440, 50);
   }
   if (alarmNumber == 3) {
