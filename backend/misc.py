@@ -35,14 +35,15 @@ def metadata_parser(path):
 			line = line.strip().split(';')
 			if (line[0] in metadata['ids'] or line[1] in metadata['names']):
 				print('Warning: overlapping entry on id %s or name "%s"' % (line[0], line[1]))
-			metadata['ids'][line[0]] = {
+
+			entry = {
+					'id': int(line[0]),
 					'name': line[1],
 					'type': line[2]
 					}
-			metadata['names'][line[1]] = {
-					'id': line[0],
-					'type': line[2]
-					}
+
+			metadata['ids'][line[0]] = entry
+			metadata['names'][line[1]] = entry
 		return metadata
 
 
