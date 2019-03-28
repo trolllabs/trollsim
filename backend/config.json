@@ -1,23 +1,18 @@
 {
 	"xplane": {
 		"read": {
-			"id": 0,
 			"ip": "0.0.0.0",
 			"port": 49005,
-			"r-ip": "127.0.0.1",
-			"r-port": 49000,
 			"buffer-size": 509
 		},
 		"write": {
-			"id": 0,
 			"ip": "127.0.0.1",
 			"port": 49000,
 			"buffer-size": 1024
 		}
 	},
 	"frontend": {
-		"id": 50,
-		"ip": "localhost",
+		"ip": "0.0.0.0",
 		"port": 8005,
 		"buffer-size": 1024
 	},
@@ -32,8 +27,9 @@
 		"buffer-size": 1
 	},
 	"imotions": {
-		"ip": "localhost",
-		"port": 5050,
+		"ip": "0.0.0.0",
+		"port": 5055,
+		"buffer-size": 1024,
 		"sensors": {
 			"Shimmer/GSR": {
 				"18": 201,
