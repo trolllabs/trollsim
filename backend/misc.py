@@ -133,15 +133,13 @@ class PacketFactory:
 
 	def from_binary(self, binary_packet):
 		packet_id = binary_packet[0]
-		metadata = self.lookup['ids'][str(packet_id)]
-		metadata['id'] = packet_id
-		return TrollPacket(metadata, binary_packet=binary_packet)
+		return TrollPacket(self.lookup['ids'][str(packet_id)], binary_packet=binary_packet)
 
 	def from_name(self, name, value):
-		metadata = self.lookup['names'][name]
-		metadata['name'] = name
-		metadata['id'] = int(metadata['id'])
-		return TrollPacket(metadata, value=value)
+		return TrollPacket(self.lookup['names'][name], value=value)
+
+	def from_id(self, packet_id, value):
+		return TrollPacket(self.lookup['ids'][str(packet_id)], value=value)
 
 
 class TrollPacket:
@@ -162,7 +160,16 @@ class TrollPacket:
 		self.metadata = metadata
 		self.binary_packet = binary_packet
 		self.timestamp = int(perf_counter()*1000)
-		self.data = value
+
+		if type(value) == str:
+			if metadata['type'] == 'float':
+				self.data = float(value)
+			elif 'int' in metadata['type']:
+				self.data = int(value)
+			else:
+				raise ValueError('Metadata error. %s' % metadata)
+		else:
+			self.data = value
 
 	@property
 	def id(self):
