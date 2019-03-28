@@ -1,6 +1,6 @@
 import sys, logging, threading, json, argparse
 from misc import metadata_parser
-from endpoints import XPlane, WebUI, Glove, iMotions
+from endpoints import XPlane, WebUI, Arduino, iMotions
 from processors import GloveMultiplier, PlatformWriter, DataWriter, DREFTunnel
 
 
@@ -46,7 +46,8 @@ def main():
 
 	xplane = XPlane(config['xplane'], meta)
 	web = WebUI(config['frontend'], meta)
-	glove = Glove(config['glove'], meta)
+	glove = Arduino(config['glove'], meta)
+	alarmbox = Arduino(config['alarmbox'], meta)
 	imotions = iMotions(config['imotions'], meta)
 
 	threads.append(xplane)
