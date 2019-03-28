@@ -1,6 +1,7 @@
 import socket, sys, serial, threading, struct, bluetooth
 from serial.tools import list_ports
 from misc import TrollPacket, Observable
+from time import sleep
 
 
 ''' Endpoints
@@ -68,7 +69,7 @@ class UDPServer(ObservableReading):
 	def __init__(self, config):
 		ObservableReading.__init__(self)
 		self.config = config
-		self.address = (self.config['r-ip'], self.config['r-port'])
+		self.address = (self.config['ip'], self.config['port'])
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.sock.bind((config['ip'], config['port']))
@@ -156,7 +157,7 @@ class Serial(ObservableReading):
 				logging.exception(e)
 				raise Exception # Crash and burn for now
 			print('Could not establish connection. Retrying.')
-			sleep(2)
+			sleep(3)
 
 	def send(self, message):
 		with self.lock:
