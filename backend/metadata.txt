@@ -4,6 +4,11 @@
 3;sim/joystick/yoke_pitch_ratio;float
 4;sim/joystick/yoke_heading_ratio;float
 5;sim/test/test_float;float
+11;ALARM_STUFF0;int
+12;ALARM_STUFF1;int
+13;ALARM_STUFF2;int
+14;ALARM_STUFF3;int
+15;ALARM_STUFF4;int
 50;frontend begin;NULL
 51;Throttle slider;float
 52;Roll slider;float
@@ -15,14 +20,18 @@
 122;Glove pitch;float
 123;Glove yaw;float
 200;imotions begin;NULL
-201;GSR RAW (no units);int
+201;GSR RAW (no units);float
 202;GSR CAL (kOhms);float
 203;GSR CAL (μSiemens);float
-210;ECG LL-RA RAW (no units);NULL
-211;ECG LL-RA CAL (mVolts);NULL
-212;ECG LA-RA RAW (no units);NULL
-213;ECG LA-RA CAL (mVolts);NULL
-214;ECG Vx-RL RAW (no units);NULL
-215;ECG Vx-RL CAL (mVolts);NULL
-216;Heart Rate ECG LL-RA (Beats/min);NULL
-217;IBI ECG LL-RA (mSecs);NULL
+210;ECG LL-RA RAW (no units);float
+211;ECG LL-RA CAL (mVolts);float
+212;ECG LA-RA RAW (no units);float
+213;ECG LA-RA CAL (mVolts);float
+214;ECG Vx-RL RAW (no units);float
+215;ECG Vx-RL CAL (mVolts);float
+216;Heart Rate ECG LL-RA (Beats/min);float
+217;IBI ECG LL-RA (mSecs);float
+220;iMotions SlideshowStart;uint32;local timestamp
+221;iMotions SlideshowStop;uint32;local timestamp
+222;iMotions SlideStart;uint32;local timestamp
+223;iMotions SlideStop;uint32;local timestamp

@@ -62,5 +62,10 @@
 		"name": "Accelerometer Glove",
 		"sn": "AH03J54W",
 		"baudrate": 115200
+	},
+	"alarmbox": {
+		"name": "Alarm Box",
+		"sn": "85439303133351D0B002",
+		"baudrate": 115200
 	}
 }
