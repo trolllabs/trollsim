@@ -8,6 +8,7 @@ class ObservableComponent(Observable, Thread):
 	def __init__(self, metadata, data_source):
 		Observable.__init__(self)
 		Thread.__init__(self)
+		self.metadata = metadata
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
 		self.data_source.connect()
@@ -24,13 +25,12 @@ class XPlane(ObservableComponent):
 	'''
 	Explain why read and write socket
 	'''
-	def __init__(self, config):
-		self.config = config['component']['xplane']
-		self.xp_write = UDPClient(self.config['write'])
-		self.xp_read = UDPServer(self.config['read'])
+	def __init__(self, config, meta):
+		self.xp_write = UDPClient(config['write'])
+		self.xp_read = UDPServer(config['read'])
 		self.xp_read.add_listener(self.parse_data)
 
-		ObservableComponent.__init__(self, config['metadata'], self.xp_read)
+		ObservableComponent.__init__(self, meta, self.xp_read)
 		self.packet_parser = XPlaneDataAdapter().parse_from_dref
 		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
 
@@ -55,12 +55,12 @@ class XPlane(ObservableComponent):
 
 
 class WebUI(ObservableComponent):
-	def __init__(self, config):
-		self.frontend = TCPServer(config['component']['frontend'])
+	def __init__(self, config, meta):
+		self.frontend = TCPServer(config)
 		self.frontend.add_listener(self.parse_data)
-		ObservableComponent.__init__(self, config['metadata'], self.frontend)
 
-		self.frontend.send(json.dumps(config['metadata']).encode('utf-8'))
+		ObservableComponent.__init__(self, meta, self.frontend)
+		self.frontend.send(json.dumps(meta).encode('utf-8'))
 
 	def write(self, trollpacket):
 		self.frontend.send(trollpacket.binary)
@@ -69,35 +69,36 @@ class WebUI(ObservableComponent):
 		packet = struct.pack('>B i', data_id, value)
 		print('0x' + packet.hex().upper())
 		self.frontend.send(packet)
-		
+
 	def parse_data(self, data):
 		if len(data) == 5:
 			packet = self.packet_factory.from_binary(data)
 			self._notify_listeners(packet)
 
 
-class Glove(ObservableComponent):
-	def __init__(self, config):
-		self.arduino = Serial(config['component']['glove'])
+class Arduino(ObservableComponent):
+	def __init__(self, config, meta):
+		self.arduino = Serial(config)
 		self.arduino.add_listener(self.parse_data)
-		ObservableComponent.__init__(self, config['metadata'], self.arduino)
+		ObservableComponent.__init__(self, meta, self.arduino)
 
 	def parse_data(self, reading):
 		if len(reading) == 5:
 			packet = self.packet_factory.from_binary(reading)
+			print(packet)
 			self._notify_listeners(packet)
 
 
 class iMotions(ObservableComponent):
-	def __init__(self, config, log=False):
-		self.receiver = UDPServer(config['components']['imotions'])
+	def __init__(self, config, meta, log=False):
+		self.receiver = UDPServer(config)
 		self.receiver.add_listener(self.parse_data)
 		self.fields = {
 				'GSR': config['sensors']['Shimmer/GSR'],
 				'ECG': config['sensors']['Shimmer/ECG'],
 				}
 
-		ObservableComponent.__init__(self, config, self.receiver)
+		ObservableComponent.__init__(self, meta, self.receiver)
 
 		self.log_file = None
 		if log:

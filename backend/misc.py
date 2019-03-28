@@ -124,8 +124,8 @@ class XPlaneDataAdapter:
 
 
 class PacketFactory:
-	def __init__(self, config):
-		self.lookup = config
+	def __init__(self, metadata):
+		self.lookup = metadata
 
 	def to_binary(self, data_id, data):
 		return struct.pack('>B %s' % type_lookup[type(data)], data_id, data)

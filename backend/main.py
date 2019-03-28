@@ -1,6 +1,6 @@
 import sys, logging, threading, json, argparse
 from misc import metadata_parser
-from endpoints import XPlane, WebUI, Glove
+from endpoints import XPlane, WebUI, Glove, iMotions
 from processors import GloveMultiplier, PlatformWriter, DataWriter, DREFTunnel
 
 
@@ -25,6 +25,7 @@ def load_configs(args):
 	with open(args.file, 'r') as f:
 		component_config = json.load(f)
 	metadata_config = metadata_parser(args.meta)
+	return component_config, metadata_config
 	return {'component': component_config, 'metadata': metadata_config}
 
 
@@ -40,16 +41,19 @@ def run_threads(threads):
 def main():
 	# Define headers.
 	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
-	config = load_configs(args)
+	config, meta = load_configs(args)
 	threads = []
 
-	xplane = XPlane(config)
-	web = WebUI(config)
-	glove = Glove(config)
+	xplane = XPlane(config['xplane'], meta)
+	web = WebUI(config['frontend'], meta)
+	glove = Glove(config['glove'], meta)
+	imotions = iMotions(config['imotions'], meta)
 
 	threads.append(xplane)
 	threads.append(web)
 	threads.append(glove)
+	threads.append(alarmbox)
+	threads.append(imotions)
 
 	gm = GloveMultiplier(glove, web, xplane)
 	dt = DREFTunnel(xplane, web)
