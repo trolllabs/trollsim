@@ -87,3 +87,33 @@ class Glove(ObservableComponent):
 			packet = self.packet_factory.from_binary(reading)
 			self._notify_listeners(packet)
 
+
+class iMotions(ObservableComponent):
+	def __init__(self, config, log=False):
+		self.receiver = UDPServer(config['components']['imotions'])
+		self.receiver.add_listener(self.parse_data)
+		self.fields = {
+				'GSR': config['sensors']['Shimmer/GSR'],
+				'ECG': config['sensors']['Shimmer/ECG'],
+				}
+
+		ObservableComponent.__init__(self, config, self.receiver)
+
+		self.log_file = None
+		if log:
+			self.log_file = open('imotions%s.log' % int(time()), 'w')
+
+	def parse_data(self, imotions_packet):
+		if self.log_file:
+			self.log_file.write(imotions_packet)
+
+		imotions_packet = imotions_packet.decode('utf-8').strip()
+		data = imotions_packet.split(';')
+		if data[2] in self.fields:
+			id_lookup = self.fields[data[2]]
+			for index in id_lookup:
+				packet = self.packet_factory.from_id(id_lookup[index], data[int(index)])
+				self._notify_listeners(packet)
+		elif data[1] == 'AttentionTool':
+			pass
+
