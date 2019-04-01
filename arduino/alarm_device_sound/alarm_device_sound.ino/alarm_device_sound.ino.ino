@@ -53,10 +53,10 @@ int activePin = 8; //digital pin triggering device on/off.
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
 
-int alarms = 10; //number of alarms that will be triggered in total before device becomes inactive again
+int alarms = 5; //number of alarms that will be triggered in total before device becomes inactive again
 int currentAlarm = 0; //counter counting how many alarms have happened
-int minPeriod = 1000; // input in seconds here minimum time period between alarms
-int maxPeriod = 4000; // input in seconds here maximum time period between
+int minPeriod = 30000; // input in seconds here minimum time period between alarms
+int maxPeriod = 90000; // input in seconds here maximum time period between
 
 byte rVal = 0;
 
@@ -215,7 +215,7 @@ bool buttonCheck(bool bValX, int buttonPinX) {
 }
 
 void soundAlarm(byte soundAlarmNumber) {
-  Wire.beginTransmission(1); ///transmit   to device #1
-  Wire.write(soundAlarmNumber);
-  Wire.endTransmission(); 
+  //Wire.beginTransmission(1); ///transmit   to device #1
+  //Wire.write(soundAlarmNumber);
+  //Wire.endTransmission(); 
 }
