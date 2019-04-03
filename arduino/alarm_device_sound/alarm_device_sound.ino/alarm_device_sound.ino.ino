@@ -46,9 +46,9 @@ int bPin3 = 4; //pin number 3rd button
 bool bVal1 = LOW; //value read from button 1
 bool bVal2 = LOW; //value read from button 2
 bool bVal3 = LOW; //value read from button 3
-int ledPin1 = 5;  //pin number 1st led
-int ledPin2 = 6;  //pin number 2nd led
-int ledPin3 = 7;  //pin number 3rd led
+int ledPin1 = 13;  //pin number 1st led (disabled, set to pin 5 to activate)
+int ledPin2 = 13;  //pin number 2nd led (disabled, set to pin 6 to activate)
+int ledPin3 = 13;  //pin number 3rd led (disabled, set to pin 7 to activate) 
 int activePin = 8; //digital pin triggering device on/off.
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
