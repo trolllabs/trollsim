@@ -25,7 +25,7 @@ class ObservableReading(Observable):
 	def send(self):
 		raise NotImplementedError('ObservableReading: No send function implemented!')
 
-	def _read(self):
+	def read(self):
 		raise NotImplementedError('ObservableReading: No read function implemented!')
 
 	def close(self):
@@ -53,9 +53,13 @@ class UDPClient(ObservableReading):
 		with self.lock:
 			self.sock.sendto(message, self.address)
 
-	def _read(self):
+	def read(self):
 		data = self.sock.recv(self.config['buffer-size'])
 		self._notify_listeners(data)
+
+	def close(self):
+		self.sock.close()
+		print('UDPClient with address %s:%s closed' % self.address)
 
 
 class UDPServer(ObservableReading):
@@ -82,7 +86,7 @@ class UDPServer(ObservableReading):
 		with self.lock:
 			self.sock.sendto(message, self.address)
 
-	def _read(self):
+	def read(self):
 		data, addr = self.sock.recvfrom(self.config['buffer-size'])
 		self._notify_listeners(data)
 
@@ -115,7 +119,7 @@ class TCPServer(ObservableReading):
 		with self.lock:
 			self.conn.send(message)
 
-	def _read(self):
+	def read(self):
 		data = self.conn.recv(self.config['buffer-size'])
 		if not data: raise ConnectionError('Broken pipe, no more data received')
 		self._notify_listeners(data)
@@ -163,7 +167,7 @@ class Serial(ObservableReading):
 		with self.lock:
 			self.serial_io.write(message)
 
-	def _read(self):
+	def read(self):
 		reading = self.serial_io.readline()
 		self._notify_listeners(reading[:-1]) # remove newline character
 
@@ -189,7 +193,7 @@ class Bluetooth(ObservableReading):
 		with self.lock:
 			self.bt_sock.send(message)
 
-	def _read(self):
+	def read(self):
 		reading = self.bt_sock.recv(self.config['buffer-size'])
 		self._notify_listeners(reading)
 
