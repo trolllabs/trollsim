@@ -26,7 +26,6 @@ def load_configs(args):
 		component_config = json.load(f)
 	metadata_config = metadata_parser(args.meta)
 	return component_config, metadata_config
-	return {'component': component_config, 'metadata': metadata_config}
 
 
 def run_threads(threads):
