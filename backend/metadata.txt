@@ -4,11 +4,11 @@
 3;sim/joystick/yoke_pitch_ratio;float
 4;sim/joystick/yoke_heading_ratio;float
 5;sim/test/test_float;float
-11;ALARM_STUFF0;int
-12;ALARM_STUFF1;int
-13;ALARM_STUFF2;int
-14;ALARM_STUFF3;int
-15;ALARM_STUFF4;int
+11;Alarm type;int
+12;Alarm armed;int
+13;Alarm number;int
+14;Alarm triggered;int
+15;Alarm test result;int
 50;frontend begin;NULL
 51;Throttle slider;float
 52;Roll slider;float
