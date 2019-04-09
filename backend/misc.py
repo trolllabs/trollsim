@@ -56,6 +56,10 @@ class Observable:
 		for listener in self.listeners:
 			listener(message)
 
+	def remove_listener(self, listener):
+		if listener in self.listeners:
+			self.listeners.remove(listener)
+
 
 class XPlaneDataAdapter:
 	'''
