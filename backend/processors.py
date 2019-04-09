@@ -53,8 +53,13 @@ class DataWriter:
 		self.start_time = int(perf_counter()*1000)
 		unix_timestamp = int(time())
 		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
-		for arg in args:
-			arg.add_listener(self.write)
+		self.endpoints = list(args)
+		for endpoint in self.endpoints:
+			endpoint.add_listener(self.write)
+
+	def add_endpoint(self, endpoint):
+		self.endpoints.append(endpoint)
+		endpoint.add_listener(self.write)
 
 	def write(self, packet):
 		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
@@ -62,5 +67,7 @@ class DataWriter:
 		self.log_file.flush()
 
 	def dispose(self):
+		for endpoint in self.endpoints:
+			endpoint.remove_listener(self.write)
 		self.log_file.close()
 
