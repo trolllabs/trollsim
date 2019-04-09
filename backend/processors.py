@@ -36,41 +36,6 @@ class GloveMultiplier:
 		self.web.write(packet)
 
 
-class DREFTunnel:
-	def __init__(self, xplane, web):
-		self.web = web
-		xplane.add_listener(self.sendto_web)
-
-	def sendto_web(self, packet):
-		self.web.write(packet)
-
-
-class PlatformWriter:
-	'''
-	Deprecated, possibly nonfunctional
-	Reads from xplane before passing it onto the platform arduino
-
-	[xplane] -> [PlatformWriter] -> [platform_arduino]
-	'''
-	def __init__(self, xplane_readsocket, platform_arduino):
-		from misc import XPlaneDataAdapter
-		self.packet_parser = XPlaneDataAdapter().parse_from_dref
-		self.data_output = platform_arduino
-		xplane_readsocket.add_listener(self.xplane_receiver)
-
-	def xplane_receiver(self, data):
-		name, value = self.packet_parser(data)
-		value = int(value)
-		if 'true_phi' in name:
-			if abs(value) >= 90:
-				self.data_output.send(0)
-			else:
-				self.data_output.send(value + 90)
-		elif 'true_theta' in name:
-			if abs(value) >= 90:
-				self.data_output.send(360)
-			else:
-				self.data_output.send(value + 90 + 180)
 
 
 class DataWriter:
