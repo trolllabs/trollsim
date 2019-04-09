@@ -9,14 +9,6 @@ to and from DREF (format defined by X-Plane).
 '''
 
 
-expected_glove_data = {
-		0: 'sim/cockpit2/engine/actuators/throttle_ratio_all',
-		1: 'sim/joystick/yoke_roll_ratio',
-		2: 'sim/joystick/yoke_pitch_ratio',
-		3: 'sim/joystick/yoke_heading_ratio'
-		}
-
-
 type_lookup = {
 		'float': 'f',
 		'int': 'i',
