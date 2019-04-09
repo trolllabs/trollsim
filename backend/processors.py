@@ -8,6 +8,11 @@ and sent further.
 '''
 
 
+class Tunnel:
+	def __init__(self, input_source, output_source):
+		input_source.add_listener(output_source.write)
+
+
 class GloveMultiplier:
 	'''
 	Takes a datastream from the glove arduino and multiplies it with
