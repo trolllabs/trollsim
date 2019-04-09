@@ -12,13 +12,17 @@ class ObservableComponent(Observable, Thread):
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
 		self.data_source.connect()
+		self.running = True
 
 	def parse_data(self):
 		raise NotImplementedError('ObservableComponent: No parse function implemented!')
 
+	def stop(self):
+		raise NotImplementedError('ObservableComponent: No stop function implemented!')
+
 	def run(self):
-		while True:
-			self.data_source._read()
+		while self.running:
+			self.data_source.read()
 
 
 class XPlane(ObservableComponent):
@@ -53,6 +57,12 @@ class XPlane(ObservableComponent):
 		packet = self.packet_factory.from_name(name, value)
 		self._notify_listeners(packet)
 
+	def stop(self):
+		self.xp_write.close()
+		self.xp_read.close()
+		self.running = False
+		print('XPlane IO closed')
+
 
 class WebUI(ObservableComponent):
 	def __init__(self, config, meta):
@@ -75,6 +85,11 @@ class WebUI(ObservableComponent):
 			packet = self.packet_factory.from_binary(data)
 			self._notify_listeners(packet)
 
+	def stop(self):
+		self.frontend.close()
+		self.running = False
+		print('WebUI IO closed')
+
 
 class Arduino(ObservableComponent):
 	def __init__(self, config, meta):
@@ -87,6 +102,11 @@ class Arduino(ObservableComponent):
 			packet = self.packet_factory.from_binary(reading)
 			print(packet)
 			self._notify_listeners(packet)
+
+	def stop(self):
+		self.arduino.close()
+		self.running = False
+		print('Arduino IO closed')
 
 
 class iMotions(ObservableComponent):
@@ -114,7 +134,13 @@ class iMotions(ObservableComponent):
 			id_lookup = self.fields[data[2]]
 			for index in id_lookup:
 				packet = self.packet_factory.from_id(id_lookup[index], data[int(index)])
+				print(packet)
 				self._notify_listeners(packet)
 		elif data[1] == 'AttentionTool':
 			pass
+
+	def stop(self):
+		self.receiver.close()
+		self.running = False
+		print('iMotions IO closed')
 
