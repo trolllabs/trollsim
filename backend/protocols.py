@@ -90,6 +90,10 @@ class UDPServer(ObservableReading):
 		data, addr = self.sock.recvfrom(self.config['buffer-size'])
 		self._notify_listeners(data)
 
+	def close(self):
+		self.sock.close()
+		print('UDPServer with address %s:%s closed' % self.address)
+
 
 class TCPServer(ObservableReading):
 	'''
@@ -170,6 +174,10 @@ class Serial(ObservableReading):
 	def read(self):
 		reading = self.serial_io.readline()
 		self._notify_listeners(reading[:-1]) # remove newline character
+
+	def close(self):
+		self.serial_io.close()
+		print('Serial %s closed'% self.config['sn'])
 
 
 class Bluetooth(ObservableReading):
