@@ -38,8 +38,7 @@ class GloveMultiplier:
 
 	def glove_handler(self, packet):
 		self.xplane.write(packet*self.multipliers.get(packet.name, 1))
-		self.web.write(packet)
-
+		self.web.write(packet*self.multipliers.get(packet.name, 1))
 
 
 
