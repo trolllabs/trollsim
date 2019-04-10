@@ -26,20 +26,23 @@ class GloveMultiplier:
 
 	[glove_arduino] -> [frontend]
 	'''
-	def __init__(self, glove, web, xplane):
+	def __init__(self):
 		self.multipliers = {}
-		self.web = web
-		self.xplane = xplane
-		glove.add_listener(self.glove_handler)
-		web.add_listener(self.update_multipliers)
+		self.endpoints = ['frontend', 'glove', 'xplane']
 
 	def update_multipliers(self, packet):
 		self.multipliers[packet.name] = packet.value
 
 	def glove_handler(self, packet):
 		self.xplane.write(packet*self.multipliers.get(packet.name, 1))
-		self.web.write(packet*self.multipliers.get(packet.name, 1))
+		self.frontend.write(packet*self.multipliers.get(packet.name, 1))
 
+	def set_sources(self, endpoints: dict):
+		self.frontend = endpoints['frontend']
+		self.xplane = endpoints['xplane']
+		self.glove = endpoints['glove']
+		self.glove.add_listener(self.glove_handler)
+		self.frontend.add_listener(self.update_multipliers)
 
 
 class DataWriter:

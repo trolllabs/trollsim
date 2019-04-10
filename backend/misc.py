@@ -137,6 +137,19 @@ class PacketFactory:
 		return TrollPacket(self.lookup['ids'][str(packet_id)], value=value)
 
 
+class ModuleFactory:
+	def __init__(self, config, meta):
+		self.config = config
+		self.meta = meta
+		self.modules = {}
+
+	def new_module(self, name, classtype):
+		self.modules[name] = lambda : classtype(self.config[name], self.meta)
+
+	def create_module(self, name):
+		return self.modules[name]()
+
+
 class TrollPacket:
 	'''
 	Internal data representation.
