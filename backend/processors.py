@@ -67,7 +67,6 @@ class DataWriter:
 	def write(self, packet):
 		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
 		self.log_file.write(packet.binary + relative_timestamp)
-		self.log_file.flush()
 
 	def dispose(self):
 		for endpoint in self.endpoints:
