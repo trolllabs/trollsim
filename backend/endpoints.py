@@ -1,7 +1,8 @@
 import struct, json, sys
 from threading import Thread
 from protocols import UDPClient, UDPServer, TCPServer, Serial, Bluetooth
-from misc import Observable, type_lookup, XPlaneDataAdapter, PacketFactory
+from misc import type_lookup, XPlaneDataAdapter
+from patterns import Observable, PacketFactory
 
 
 class ObservableComponent(Observable, Thread):

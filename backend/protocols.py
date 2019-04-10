@@ -1,6 +1,7 @@
 import socket, sys, serial, threading, struct, bluetooth
 from serial.tools import list_ports
-from misc import TrollPacket, Observable
+from datastructures import TrollPacket
+from patterns import Observable
 from time import sleep
 
 

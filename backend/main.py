@@ -1,9 +1,9 @@
 import sys, logging, threading, json, argparse
-from misc import metadata_parser, ModuleFactory
+from misc import metadata_parser
+from patterns import ModuleFactory
 from endpoints import XPlane, WebUI, Arduino, iMotions
 from processors import GloveMultiplier, DataWriter, Tunnel
 from http.server import BaseHTTPRequestHandler, HTTPServer
-
 
 
 class ArgparseHelper(argparse.ArgumentParser):
