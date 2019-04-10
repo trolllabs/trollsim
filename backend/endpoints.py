@@ -21,6 +21,9 @@ class ObservableComponent(Observable, Thread):
 	def stop(self):
 		raise NotImplementedError('ObservableComponent: No stop function implemented!')
 
+	def write(self):
+		raise NotImplementedError('ObservableComponent: No write function implemented!')
+
 	def run(self):
 		while self.running:
 			self.data_source.read()
