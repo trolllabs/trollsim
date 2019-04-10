@@ -96,6 +96,31 @@ class UDPServer(ObservableReading):
 		print('UDPServer with address %s:%s closed' % self.address)
 
 
+class TCPClient(ObservableReading):
+	def __init__(self, config):
+		ObservableReading.__init__(self)
+		self.config = config
+		self.address = (config['ip'], config['port'])
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+	def connect(self):
+		self.sock.connect(self.address)
+
+	def send(self, message):
+		with self.lock:
+			self.sock.send(message)
+
+	def read(self):
+		data = self.sock.recv(self.config['buffer-size'])
+		if not data: raise ConnectionError('Broken pipe, no more data received')
+		self._notify_listeners(data)
+
+	def close(self):
+		self.sock.close()
+		print('TCP Server closed.')
+
+
 class TCPServer(ObservableReading):
 	'''
 	Accepts only one connection.
