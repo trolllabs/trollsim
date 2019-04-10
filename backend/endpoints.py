@@ -1,4 +1,4 @@
-import struct, json
+import struct, json, sys
 from threading import Thread
 from protocols import UDPClient, UDPServer, TCPServer, Serial, Bluetooth
 from misc import Observable, type_lookup, XPlaneDataAdapter, PacketFactory
@@ -99,8 +99,12 @@ class Arduino(ObservableComponent):
 
 	def parse_data(self, reading):
 		if len(reading) == 5:
-			packet = self.packet_factory.from_binary(reading)
-			self._notify_listeners(packet)
+			try:
+				packet = self.packet_factory.from_binary(reading)
+				self._notify_listeners(packet)
+			except KeyError as e:
+				err_msg = 'Arduino KeyError %s. Binary packet: %s' % (e, reading.hex().upper())
+				sys.stderr.write(err_msg)
 
 	def stop(self):
 		self.arduino.close()
