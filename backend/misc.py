@@ -96,3 +96,31 @@ class XPlaneDataAdapter:
 		return name, value
 
 
+class DataWriter:
+	'''
+	Write all data to binary file. Each entry should be in
+	big-endian. Name of file is the unix timestamp on system when
+	program start up.
+	'''
+	def __init__(self, *args, path='.'):
+		from time import perf_counter, time
+		self.start_time = int(perf_counter()*1000)
+		unix_timestamp = int(time())
+		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
+		self.endpoints = list(args)
+		for endpoint in self.endpoints:
+			endpoint.add_listener(self.write)
+
+	def add_endpoint(self, endpoint):
+		self.endpoints.append(endpoint)
+		endpoint.add_listener(self.write)
+
+	def write(self, packet):
+		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
+		self.log_file.write(packet.binary + relative_timestamp)
+
+	def dispose(self):
+		for endpoint in self.endpoints:
+			endpoint.remove_listener(self.write)
+		self.log_file.close()
+

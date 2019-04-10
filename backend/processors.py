@@ -1,6 +1,3 @@
-import sys, logging, struct
-
-
 ''' Data processors
 
 A collection of hubs where data pass through, gets possibly mutated
@@ -11,6 +8,22 @@ and sent further.
 class Tunnel:
 	def __init__(self, input_source, output_source):
 		input_source.add_listener(output_source.write)
+
+
+class AudioTrigger:
+	def __init__(self):
+		self.endpoints = ['alarmbox', 'audiosocket']
+
+	def send_signal(self, packet):
+		if packet.id == 14:
+			self.audiosocket.write(packet)
+		if packet.id == 15:
+			self.audiosocket.write(packet)
+
+	def set_sources(self, endpoints: dict):
+		self.alarmbox = endpoints['alarmbox']
+		self.audiosocket = endpoints['audiosocket']
+		self.alarmbox.add_listener(self.send_signal)
 
 
 class GloveMultiplier:
@@ -43,33 +56,4 @@ class GloveMultiplier:
 		self.glove = endpoints['glove']
 		self.glove.add_listener(self.glove_handler)
 		self.frontend.add_listener(self.update_multipliers)
-
-
-class DataWriter:
-	'''
-	Write all data to binary file. Each entry should be in
-	big-endian. Name of file is the unix timestamp on system when
-	program start up.
-	'''
-	def __init__(self, *args, path='.'):
-		from time import perf_counter, time
-		self.start_time = int(perf_counter()*1000)
-		unix_timestamp = int(time())
-		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
-		self.endpoints = list(args)
-		for endpoint in self.endpoints:
-			endpoint.add_listener(self.write)
-
-	def add_endpoint(self, endpoint):
-		self.endpoints.append(endpoint)
-		endpoint.add_listener(self.write)
-
-	def write(self, packet):
-		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
-		self.log_file.write(packet.binary + relative_timestamp)
-
-	def dispose(self):
-		for endpoint in self.endpoints:
-			endpoint.remove_listener(self.write)
-		self.log_file.close()
 

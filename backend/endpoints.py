@@ -1,6 +1,6 @@
 import struct, json, sys
 from threading import Thread
-from protocols import UDPClient, UDPServer, TCPServer, Serial, Bluetooth
+from protocols import UDPClient, UDPServer, TCPServer, TCPClient, Serial, Bluetooth
 from misc import type_lookup, XPlaneDataAdapter
 from patterns import Observable, PacketFactory
 
@@ -149,4 +149,13 @@ class iMotions(ObservableComponent):
 		self.receiver.close()
 		self.running = False
 		print('iMotions IO closed')
+
+
+class AudioSocket(ObservableComponent):
+	def __init__(self, config, meta):
+		self.sender = TCPClient(config)
+		ObservableComponent.__init__(self, meta, self.sender)
+
+	def write(self, packet):
+		self.sender.send(str(packet.value).encode('utf-8'))
 
