@@ -1,9 +1,15 @@
 import serial, struct
 from time import sleep
+from serial.tools import list_ports
 
 
-s = serial.Serial('/dev/ttyUSB0', 115200)#, parity=serial.PARITY_EVEN)
+PORT = '/dev/ttyACM0'
 
+port_info = next(list_ports.grep(PORT))
+print('Port: %s\nSerial number: %s' % (PORT, port_info.serial_number))
+print('=============================================')
+
+s = serial.Serial(PORT, 115200)#, parity=serial.PARITY_EVEN)
 
 '''
 Expects:
