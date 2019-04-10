@@ -100,7 +100,6 @@ class Arduino(ObservableComponent):
 	def parse_data(self, reading):
 		if len(reading) == 5:
 			packet = self.packet_factory.from_binary(reading)
-			print(packet)
 			self._notify_listeners(packet)
 
 	def stop(self):
@@ -134,7 +133,6 @@ class iMotions(ObservableComponent):
 			id_lookup = self.fields[data[2]]
 			for index in id_lookup:
 				packet = self.packet_factory.from_id(id_lookup[index], data[int(index)])
-				print(packet)
 				self._notify_listeners(packet)
 		elif data[1] == 'AttentionTool':
 			pass
