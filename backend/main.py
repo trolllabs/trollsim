@@ -167,9 +167,6 @@ def main():
 	modules.new_module('alarmbox', Arduino)
 	modules.new_module('imotions', iMotions)
 
-	#gm = GloveMultiplier(glove, web, xplane)
-	#logger = DataWriter(alarmbox, imotions)
-
 	run(modules)
 
 
