@@ -210,7 +210,8 @@ void loop(){
 	//angle_yaw_output_v = angle_yaw_output_v * 0.9 + angle_yaw_v * 0.1;      //Take 90% of the output pitch value and add 10% of the raw pitch value
 
 	// read and print value of flex sensor
-	flex_output = fractionMap(analogRead(flexSensorPin),40,105,1,0); //read value of flex sensor
+	flex_output = analogRead(flexSensorPin);
+	flex_output = fractionMap(flex_output,17,40,1,0); //read value of flex sensor
 
 	if (flex_output > 1)
 		flex_output = 1.0;
@@ -228,7 +229,7 @@ void loop(){
 	//  Serial.print(YAW_ID); Serial.print(';'); Serial.println(yaw_output);
 
 	write_all(flex_output, roll_output, pitch_output, yaw_output);
-  Serial.flush();
+	Serial.flush();
 	//  Serial.println(flex_output);
 	//	write_float(FLEX_ID, flex_output);
 	//	write_float(ROLL_ID, roll_output);
