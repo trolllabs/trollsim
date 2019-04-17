@@ -6,9 +6,10 @@ from patterns import Observable, PacketFactory
 
 
 class ObservableComponent(Observable, Thread):
-	def __init__(self, metadata, data_source):
+	def __init__(self, metadata, data_source, extra_protocols=[]):
 		Observable.__init__(self)
 		Thread.__init__(self)
+		self.protocols = extra_protocols
 		self.metadata = metadata
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
@@ -29,6 +30,13 @@ class ObservableComponent(Observable, Thread):
 		while self.running:
 			self.data_source.read()
 
+	def stop(self):
+		self.running = False
+		self.data_source.close()
+		for protocol in self.protocols:
+			protocol.close()
+		print('%s IO closed' % self.name)
+
 
 class XPlane(ObservableComponent):
 	'''
@@ -39,7 +47,7 @@ class XPlane(ObservableComponent):
 		self.xp_read = UDPServer(config['read'])
 		self.xp_read.add_listener(self.parse_data)
 
-		ObservableComponent.__init__(self, meta, self.xp_read)
+		ObservableComponent.__init__(self, meta, self.xp_read, [self.xp_write])
 		self.packet_parser = XPlaneDataAdapter().parse_from_dref
 		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
 
@@ -61,12 +69,6 @@ class XPlane(ObservableComponent):
 		name, value = self.packet_parser(data)
 		packet = self.packet_factory.from_name(name, value)
 		self._notify_listeners(packet)
-
-	def stop(self):
-		self.xp_write.close()
-		self.xp_read.close()
-		self.running = False
-		print('XPlane IO closed')
 
 
 class WebUI(ObservableComponent):
@@ -90,11 +92,6 @@ class WebUI(ObservableComponent):
 			packet = self.packet_factory.from_binary(data)
 			self._notify_listeners(packet)
 
-	def stop(self):
-		self.frontend.close()
-		self.running = False
-		print('WebUI IO closed')
-
 
 class Arduino(ObservableComponent):
 	def __init__(self, config, meta):
@@ -110,11 +107,6 @@ class Arduino(ObservableComponent):
 			except KeyError as e:
 				err_msg = 'Arduino KeyError %s. Binary packet: %s' % (e, reading.hex().upper())
 				sys.stderr.write(err_msg)
-
-	def stop(self):
-		self.arduino.close()
-		self.running = False
-		print('Arduino IO closed')
 
 
 class iMotions(ObservableComponent):
@@ -145,11 +137,6 @@ class iMotions(ObservableComponent):
 				self._notify_listeners(packet)
 		elif data[1] == 'AttentionTool':
 			pass
-
-	def stop(self):
-		self.receiver.close()
-		self.running = False
-		print('iMotions IO closed')
 
 
 class AudioSocket(ObservableComponent):
