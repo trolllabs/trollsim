@@ -15,14 +15,15 @@ class ObservableComponent(Observable, Thread):
 		self.data_source.connect()
 		self.running = True
 
-	def parse_data(self):
-		raise NotImplementedError('ObservableComponent: No parse function implemented!')
+	@property
+	def name(self):
+		return type(self).__name__
 
-	def stop(self):
-		raise NotImplementedError('ObservableComponent: No stop function implemented!')
+	def parse_data(self):
+		raise NotImplementedError('%s: No parse function implemented!' % self.name)
 
 	def write(self):
-		raise NotImplementedError('ObservableComponent: No write function implemented!')
+		raise NotImplementedError('%s: No write function implemented!' % self.name)
 
 	def run(self):
 		while self.running:
