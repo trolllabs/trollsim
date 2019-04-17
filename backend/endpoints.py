@@ -73,11 +73,11 @@ class XPlane(ObservableComponent):
 
 class WebUI(ObservableComponent):
 	def __init__(self, config, meta):
+		self.meta = meta
 		self.frontend = TCPServer(config)
 		self.frontend.add_listener(self.parse_data)
 
 		ObservableComponent.__init__(self, meta, self.frontend)
-		self.frontend.send(json.dumps(meta).encode('utf-8'))
 
 	def write(self, trollpacket):
 		self.frontend.send(trollpacket.binary)
@@ -88,7 +88,9 @@ class WebUI(ObservableComponent):
 		self.frontend.send(packet)
 
 	def parse_data(self, data):
-		if len(data) == 5:
+		if data.decode('utf-8') == 'metadata':
+			self.frontend.send(json.dumps(self.meta).encode('utf-8'))
+		else:
 			packet = self.packet_factory.from_binary(data)
 			self._notify_listeners(packet)
 
