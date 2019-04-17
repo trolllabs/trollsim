@@ -24,9 +24,7 @@ function setDataHandler(handler) {
 }
 
 tcp_client.on('connect', function () {
-	//tcp_client.setEncoding('utf-8');
-	//tcp_client.write('Node socket connected.\n');
-	console.log('Backend connected.');
+	console.log('Connected.');
 });
 
 tcp_client.on('error', function (err) {
