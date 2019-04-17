@@ -16,6 +16,11 @@
 		"port": 8005,
 		"buffer-size": 1024
 	},
+	"audiosocket": {
+		"ip": "127.0.0.1",
+		"port": 5060,
+		"buffer-size": 1024
+	},
 	"shimmer-gsr": {
 		"name": "Shimmer3-C6F2",
 		"MAC": "00:06:66:D7:C6:F2",
