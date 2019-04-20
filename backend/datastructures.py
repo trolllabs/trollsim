@@ -74,8 +74,10 @@ class TrollPacket:
 
 	def _native_typecheck(self, value):
 		if type(value) == TrollPacket:
-			value = value.value
-		return value
+			retval = value.value
+		else:
+			retval = value
+		return retval
 
 	def _new_packet(self, new_value):
 		return TrollPacket(self.metadata, value=new_value)
