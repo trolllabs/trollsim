@@ -15,10 +15,10 @@
 53;Pitch slider;float
 54;Yaw slider;float
 100;arduino begin;NULL
-120;Glove flex;float
-121;Glove roll;float
-122;Glove pitch;float
-123;Glove yaw;float
+120;sim/cockpit2/engine/actuators/throttle_ratio_all;float
+121;sim/joystick/yoke_roll_ratio;float
+122;sim/joystick/yoke_pitch_ratio;float
+123;sim/joystick/yoke_heading_ratio;float
 200;imotions begin;NULL
 201;GSR RAW (no units);float
 202;GSR CAL (kOhms);float
