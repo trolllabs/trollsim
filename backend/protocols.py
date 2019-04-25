@@ -1,4 +1,4 @@
-import socket, sys, serial, threading, struct, bluetooth
+import socket, sys, serial, threading, struct, bluetooth, select
 from serial.tools import list_ports
 from datastructures import TrollPacket
 from patterns import Observable
@@ -112,11 +112,16 @@ class TCPClient(ObservableReading):
 			self.sock.send(message)
 
 	def read(self):
-		data = self.sock.recv(self.config['buffer-size'])
-		if not data: raise ConnectionError('Broken pipe, no more data received')
-		self._notify_listeners(data)
+		try:
+			readers, _, _ = select.select([self.sock], [], [])
+			data = readers[0].recv(self.config['buffer-size'])
+			if not data: raise ConnectionError('Broken pipe, no more data received')
+			self._notify_listeners(data)
+		except select.error as e:
+			sys.stderr.write('TCPClient fd: %s' % e)
 
 	def close(self):
+		self.sock.shutdown(socket.SHUT_RDWR)
 		self.sock.close()
 		print('TCP Server closed.')
 
@@ -150,11 +155,17 @@ class TCPServer(ObservableReading):
 			self.conn.send(message)
 
 	def read(self):
-		data = self.conn.recv(self.config['buffer-size'])
-		if not data: raise ConnectionError('Broken pipe, no more data received')
-		self._notify_listeners(data)
+		try:
+			readers, _, _ = select.select([self.conn], [], [])
+			data = readers[0].recv(self.config['buffer-size'])
+			if not data: return
+			self._notify_listeners(data)
+		except select.error as e:
+			sys.stderr.write('TCPServer fd: %s' % e)
 
 	def close(self):
+		self.conn.shutdown(socket.SHUT_RDWR)
+		self.conn.close()
 		self.sock.close()
 		print('TCP Server closed.')
 
