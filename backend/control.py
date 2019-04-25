@@ -97,7 +97,7 @@ class ControlAPI(BaseHTTPRequestHandler):
 
 	def stop_module(self, module_name):
 		res = 200
-		print('stopping %s' % module_name)
+		print('Stopping %s' % module_name)
 		if self.running_modules.get(module_name, False):
 			self.running_modules[module_name].stop()
 			del self.running_modules[module_name]

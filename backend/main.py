@@ -1,16 +1,9 @@
-import sys, logging, json, argparse
+import sys, logging
 from control import ControlAPI
-from misc import metadata_parser
+from misc import metadata_parser, ArgparseHelper, load_configs
 from patterns import ModuleFactory
 from endpoints import XPlane, WebUI, Arduino, iMotions, AudioSocket
 from http.server import HTTPServer
-
-
-class ArgparseHelper(argparse.ArgumentParser):
-	def error(self, message):
-		sys.stderr.write('error: %s\n' % message)
-		self.print_help()
-		sys.exit(2)
 
 
 parser = ArgparseHelper()
@@ -21,14 +14,6 @@ parser.add_argument('-m','--meta', type=str, default='metadata.txt',
 parser.add_argument('-s', '--save', action='store_true', default=False,
 		help='Save current session to a logfile.') # Specify where it will be written
 args = parser.parse_args()
-
-
-def load_configs(args):
-	with open(args.file, 'r') as f:
-		component_config = json.load(f)
-	with open(args.meta, 'r') as f:
-		metadata_config = metadata_parser(f)
-	return component_config, metadata_config
 
 
 def run(modules):

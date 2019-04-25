@@ -1,5 +1,4 @@
-import struct
-from time import perf_counter
+import struct, json, argparse, sys
 
 
 ''' Misc
@@ -7,6 +6,21 @@ from time import perf_counter
 General tools for mostly variable lookup and data conversion, including
 to and from DREF (format defined by X-Plane).
 '''
+
+
+class ArgparseHelper(argparse.ArgumentParser):
+	def error(self, message):
+		sys.stderr.write('error: %s\n' % message)
+		self.print_help()
+		sys.exit(2)
+
+
+def load_configs(args):
+	with open(args.file, 'r') as f:
+		component_config = json.load(f)
+	with open(args.meta, 'r') as f:
+		metadata_config = metadata_parser(f)
+	return component_config, metadata_config
 
 
 type_lookup = {
