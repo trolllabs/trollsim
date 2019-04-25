@@ -1,4 +1,4 @@
-import socket, sys, serial, threading, struct, bluetooth, select
+import socket, sys, serial, threading, struct, bluetooth, select, logging
 from serial.tools import list_ports
 from datastructures import TrollPacket
 from patterns import Observable
@@ -118,7 +118,7 @@ class TCPClient(ObservableReading):
 			if not data: raise ConnectionError('Broken pipe, no more data received')
 			self._notify_listeners(data)
 		except select.error as e:
-			sys.stderr.write('TCPClient fd: %s' % e)
+			logging.exception('TCPClient fd: %s' % e)
 
 	def close(self):
 		self.sock.shutdown(socket.SHUT_RDWR)
@@ -161,7 +161,7 @@ class TCPServer(ObservableReading):
 			if not data: return
 			self._notify_listeners(data)
 		except select.error as e:
-			sys.stderr.write('TCPServer fd: %s' % e)
+			logging.exception('TCPServer fd: %s' % e)
 
 	def close(self):
 		self.conn.shutdown(socket.SHUT_RDWR)
@@ -195,12 +195,10 @@ class Serial(ObservableReading):
 				return
 			except StopIteration:
 				e = 'Serial: Could not find serial %s for %s.\n' % (self.config['sn'], self.config['name'])
-				sys.stderr.write(e)
+				logging.exception(self.config['sn'])
 			except serial.serialutil.SerialExcepion as e:
 				e = 'Serial error: %s\n' % str(e)
-				sys.stderr.write(e)
-				logging.exception(e)
-				raise Exception # Crash and burn for now
+				logging.exception(self.config)
 			print('Could not establish connection. Retrying.')
 			sleep(3)
 
@@ -230,6 +228,7 @@ class Bluetooth(ObservableReading):
 				self.bt_sock.connect((self.config['mac'], 1))
 				return
 			except bluetooth.BluetoothError as e:
+				logging.exception(self.config['mac'])
 				print('Bluetooth error: ', e)
 				print('Retrying')
 			sleep(2)

@@ -1,4 +1,4 @@
-import struct, json, sys
+import struct, json, sys, logging
 from threading import Thread
 from protocols import UDPClient, UDPServer, TCPServer, TCPClient, Serial, Bluetooth
 from misc import type_lookup, XPlaneDataAdapter
@@ -105,10 +105,11 @@ class Arduino(ObservableComponent):
 		if len(reading) == 5:
 			try:
 				packet = self.packet_factory.from_binary(reading)
+				print(packet)
 				self._notify_listeners(packet)
 			except KeyError as e:
-				err_msg = 'Arduino KeyError %s. Binary packet: %s' % (e, reading.hex().upper())
-				sys.stderr.write(err_msg)
+				err_msg = 'Arduino metadata %s. Binary packet: %s' % (e, reading.hex().upper())
+				logging.exception(err_msg)
 
 
 class iMotions(ObservableComponent):

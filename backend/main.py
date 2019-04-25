@@ -25,8 +25,6 @@ def run(modules):
 
 
 def main():
-	# Define headers.
-	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
 	config, meta = load_configs(args)
 	modules = ModuleFactory(config, meta)
 
@@ -41,5 +39,18 @@ def main():
 
 
 if __name__ == "__main__":
+	log_format = '%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s'
+	log_formatter = logging.Formatter(log_format)
+
+	consoleHandler = logging.StreamHandler()
+	consoleHandler.setFormatter(log_formatter)
+
+	fileHandler = logging.FileHandler('error_log.txt')
+	fileHandler.setFormatter(log_formatter)
+
+	error_logger = logging.getLogger()
+	error_logger.addHandler(consoleHandler)
+	error_logger.addHandler(fileHandler)
+
 	main()
 
