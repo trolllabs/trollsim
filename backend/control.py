@@ -90,7 +90,8 @@ class ControlAPI(AbstractedHTTPHandler):
 		if module_name not in self.running_modules:
 			if module_name in self.module_creator.modules:
 				new_module = self.module_creator.create_module(module_name)
-				self.logger.add_endpoint(new_module)
+				if self.logger:
+					self.logger.add_endpoint(new_module)
 				new_module.start()
 				self.running_modules[module_name] = new_module
 			else:
