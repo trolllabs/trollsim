@@ -52,6 +52,43 @@ def metadata_parser(f):
 	return metadata
 
 
+class DtypeConverter:
+	int32_struct = struct.Struct('>i')
+	float_struct = struct.Struct('>f')
+	char_struct = struct.Struct('>B')
+
+	int32_pack = int32_struct.pack
+	float_pack = float_struct.pack
+	char_pack = char_struct.pack
+
+	int32_unpack = int32_struct.unpack
+	float_unpack = float_struct.unpack
+
+	float_packet_pack = struct.Struct('>B f').pack
+	int_packet_pack = struct.Struct('>B i').pack
+
+	def int_to_bin(val):
+		return DtypeConverter.int32_pack(val)
+
+	def float_to_bin(val):
+		return DtypeConverter.float_pack(val)
+
+	def char_to_bin(val):
+		return DtypeConverter.char_pack(val)
+
+	def bin_to_int(bin_val):
+		return DtypeConverter.int32_unpack(bin_val)
+
+	def bin_to_float(bin_val):
+		return DtypeConverter.float_unpack(bin_val)
+
+	def float_to_packet(packet_id, float_val):
+		return float_packet_pack(packet_id, float_val)
+
+	def int_to_packet(packet_id, float_val):
+		return int_packet_pack(packet_id, float_val)
+
+
 class XPlaneDataAdapter:
 	'''
 	Can convert data from and to dataref (dref), which is X-Plane's
