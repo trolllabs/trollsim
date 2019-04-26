@@ -192,7 +192,7 @@ class Serial(ObservableReading):
 				print('%s: Found hwid: %s at %s' \
 						% (self.config['name'], serial_port.hwid, serial_port.device))
 				self.serial_io = serial.Serial(serial_port.device, self.config['baudrate'])
-				return
+				break
 			except StopIteration:
 				e = 'Serial: Could not find serial %s for %s.\n' % (self.config['sn'], self.config['name'])
 				logging.exception(self.config['sn'])
