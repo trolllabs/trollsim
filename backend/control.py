@@ -1,9 +1,23 @@
+import logging
 from misc import DataWriter
 from processors import GloveMultiplier, Tunnel, AudioTrigger
 from http.server import BaseHTTPRequestHandler
 
 
-class ControlAPI(BaseHTTPRequestHandler):
+class AbstractedHTTPHandler(BaseHTTPRequestHandler):
+	def __call__(self, *args):
+		BaseHTTPRequestHandler.__init__(self, *args)
+
+	def send_response_header(self, http_code):
+		self.send_response(http_code)
+		self.send_header('Content-type', 'text/html')
+		self.end_headers()
+
+	def write(self, data):
+		self.wfile.write(data.encode())
+
+
+class ControlAPI(AbstractedHTTPHandler):
 	def __init__(self, modules):
 		self.module_creator = modules
 		self.logger = None
@@ -12,9 +26,6 @@ class ControlAPI(BaseHTTPRequestHandler):
 				'gm': GloveMultiplier(),
 				'at': AudioTrigger()
 				}
-
-	def __call__(self, *args):
-		BaseHTTPRequestHandler.__init__(self, *args)
 
 	def do_GET(self):
 		path = self.path.split('/')[1:]
@@ -38,36 +49,22 @@ class ControlAPI(BaseHTTPRequestHandler):
 		else:
 			self.send_response_header(404)
 
-	def send_response_header(self, http_code):
-		self.send_response(http_code)
-		self.send_header('Content-type', 'text/html')
-		self.end_headers()
-
-	def write(self, data):
-		self.wfile.write(data.encode())
-
 	def run_endpoint_command(self, endpoint_name, command):
-		if self.logger:
-			if command == 'start':
-				status_code = self.start_module(endpoint_name)
-				self.send_response_header(status_code)
-			elif command == 'stop':
-				status_code = self.stop_module(endpoint_name)
-				self.send_response_header(status_code)
-			else:
-				self.send_response_header(404)
+		if command == 'start':
+			status_code = self.start_module(endpoint_name)
+			self.send_response_header(status_code)
+		elif command == 'stop':
+			status_code = self.stop_module(endpoint_name)
+			self.send_response_header(status_code)
 		else:
 			self.send_response_header(409)
 
 	def run_processor_command(self, processor_name):
-		if self.logger:
-			if processor_name in self.processors:
-				for module in self.processors[processor_name].endpoints:
-					self.start_module(module)
-				self.processors[processor_name].set_sources(self.running_modules)
-				self.send_response_header(200)
-		else:
-			self.send_response_header(409)
+		if processor_name in self.processors:
+			for module in self.processors[processor_name].endpoints:
+				self.start_module(module)
+			self.processors[processor_name].set_sources(self.running_modules)
+			self.send_response_header(200)
 
 	def get_status(self):
 		status = 'Trollsim status\n================='
