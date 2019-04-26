@@ -61,11 +61,10 @@ class XPlane(ObservableComponent):
 		self.xp_read.add_listener(self.parse_data)
 
 		ObservableComponent.__init__(self, meta, self.xp_read, [self.xp_write])
-		self.packet_parser = XPlaneDataAdapter().parse_from_dref
-		self.packet_wrapper = XPlaneDataAdapter().parse_to_dref
+		self.adapter = XPlaneDataAdapter()
 
 	def write(self, trollpacket):
-		packet = self.packet_wrapper(trollpacket.name, trollpacket.value)
+		packet = self.adapter.parse_to_dref(trollpacket.name, trollpacket.value)
 		self.xp_write.send(packet)
 
 	def external_write(self, name, value):
@@ -79,7 +78,7 @@ class XPlane(ObservableComponent):
 		self.write(packet)
 
 	def parse_data(self, data):
-		name, value = self.packet_parser(data)
+		name, value = self.adapter.parse_from_dref(data)
 		packet = self.packet_factory.from_name(name, value)
 		self.update_listeners(packet)
 
