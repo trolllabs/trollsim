@@ -15,11 +15,16 @@ class ObservableComponent(Observable, Thread):
 		self.packet_factory = PacketFactory(metadata)
 		self.data_source.connect()
 		self.endpoint_id = -1
+		self.endpoint_name = type(self).__name__
 		self.running = True
 
 	@property
 	def name(self):
-		return type(self).__name__
+		return self.endpoint_name
+
+	@name.setter
+	def name(self, endpoint_name):
+		self.endpoint_name = endpoint_name
 
 	@property
 	def id(self):

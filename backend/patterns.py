@@ -53,5 +53,7 @@ class ModuleFactory:
 		self.modules[name] = lambda : classtype(self.config[name], self.meta)
 
 	def create_module(self, name):
-		return self.modules[name]()
+		new_module =  self.modules[name]()
+		new_module.name = name
+		return new_module
 

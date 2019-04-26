@@ -1,4 +1,4 @@
-import struct, json, argparse, sys
+import struct, json, argparse, sys, logging, os
 
 
 ''' Misc
@@ -153,16 +153,26 @@ class DataWriter:
 	big-endian. Name of file is the unix timestamp on system when
 	program start up.
 	'''
-	def __init__(self, *args, path='.'):
+	def __init__(self, config, meta, path='.'):
 		from time import perf_counter, time
+		from os import mkdir
 		self.start_time = int(perf_counter()*1000)
 		unix_timestamp = int(time())
-		self.log_file = open('%s/trollsim%s.log' % (path.rstrip('/'), unix_timestamp), 'wb')
-		self.endpoints = list(args)
-		for endpoint in self.endpoints:
-			endpoint.add_listener(self.write)
 		self.logging_modules = {}
 		self.endpoints = []
+		self.config = config
+		self.meta = meta
+
+		try:
+			logpath = '%s/log%s' % (path.rstrip('/'), unix_timestamp)
+			os.mkdir(logpath)
+			self.log_file = open(logpath + '/log.bin', 'wb')
+			self.log_modules = open(logpath + '/modules.json', 'w')
+			self.config_file = open(logpath + '/config.json', 'w')
+			self.meta_file = open(logpath + '/metadata.json', 'w')
+		except FileExistsError as e:
+			logging.exception('Cannot overwrite directory %s.' % logpath)
+			raise IOError(logpath) from e
 
 	def assign_module_id(self, endpoint, module_id):
 		if endpoint.name in self.logging_modules:
@@ -181,11 +191,24 @@ class DataWriter:
 		module_id = DtypeConverter.char_to_bin(packet.module_id)
 		self.log_file.write(packet.binary + relative_timestamp + module_id)
 
+	def to_json(self, dictionary):
+		return json.dumps(dictionary, sort_keys=True, indent='\t')
+
 	def dispose(self):
 		for endpoint in self.endpoints:
 			self.assign_module_id(endpoint, -1)
 			endpoint.remove_listener(self.write)
 		self.logging_modules = {}
 		self.endpoints = []
+		self.log_modules.close()
 		self.log_file.close()
+		self.config_file.close()
+		self.meta_file.close()
+		print('DataWriter session ended')
+
+	def end_session(self):
+		self.log_modules.write(self.to_json(self.logging_modules))
+		self.config_file.write(self.to_json(self.config))
+		self.meta_file.write(self.to_json(self.meta))
+		self.dispose()
 

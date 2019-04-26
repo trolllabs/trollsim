@@ -115,7 +115,7 @@ class ControlAPI(AbstractedHTTPHandler):
 	def start_logging(self):
 		if not self.logger:
 			try:
-				self.logger = DataWriter()
+				self.logger = DataWriter(self.module_creator.config, self.module_creator.meta)
 				self.write('Begin log session.\n')
 				for module in self.running_modules:
 					self.logger.add_endpoint(self.running_modules[module])
@@ -128,7 +128,7 @@ class ControlAPI(AbstractedHTTPHandler):
 
 	def stop_logging(self):
 		if self.logger:
-			self.logger.dispose()
+			self.logger.end_session()
 			for module in self.running_modules:
 				self.running_modules[module].stop()
 			self.running_modules = {}
