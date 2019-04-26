@@ -46,6 +46,12 @@ class ControlAPI(AbstractedHTTPHandler):
 				self.run_processor_command(path[1])
 			else:
 				self.run_endpoint_command(path[0], path[1])
+		elif len(path) == 3 and path[0] == 'tunnel':
+			if path[1] in self.running_modules and path[2] in self.running_modules:
+				Tunnel(self.running_modules[path[1]], self.running_modules[path[2]])
+				self.send_response_header(200)
+			else:
+				self.send_response_header(409)
 		else:
 			self.send_response_header(404)
 
@@ -57,7 +63,7 @@ class ControlAPI(AbstractedHTTPHandler):
 			status_code = self.stop_module(endpoint_name)
 			self.send_response_header(status_code)
 		else:
-			self.send_response_header(409)
+			self.send_response_header(404)
 
 	def run_processor_command(self, processor_name):
 		if processor_name in self.processors:
@@ -70,10 +76,11 @@ class ControlAPI(AbstractedHTTPHandler):
 		status = 'Trollsim status\n================='
 		if self.logger:
 			status += '\nCurrently logging.'
-			for endpoint in self.running_modules:
-				status += '\n\t%s: running' % endpoint
 		else:
-			status += '\nIdle'
+			status += '\nNot logging'
+		status += '\n\nModules:'
+		for endpoint in self.running_modules:
+			status += '\n\t%s: running' % endpoint
 		status += '\n\n'
 		self.write(status)
 		self.send_response_header(200)
