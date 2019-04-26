@@ -161,17 +161,31 @@ class DataWriter:
 		self.endpoints = list(args)
 		for endpoint in self.endpoints:
 			endpoint.add_listener(self.write)
+		self.logging_modules = {}
+		self.endpoints = []
+
+	def assign_module_id(self, endpoint, module_id):
+		if endpoint.name in self.logging_modules:
+			endpoint.id = self.logging_modules[endpoint.name]
+		else:
+			endpoint.id = module_id
+			self.logging_modules[endpoint.name] = endpoint.id
 
 	def add_endpoint(self, endpoint):
-		self.endpoints.append(endpoint)
+		self.assign_module_id(endpoint, len(self.logging_modules))
 		endpoint.add_listener(self.write)
+		self.endpoints.append(endpoint)
 
 	def write(self, packet):
-		relative_timestamp = struct.pack('>i', packet.timestamp - self.start_time)
-		self.log_file.write(packet.binary + relative_timestamp)
+		relative_timestamp = DtypeConverter.int_to_bin(packet.timestamp - self.start_time)
+		module_id = DtypeConverter.char_to_bin(packet.module_id)
+		self.log_file.write(packet.binary + relative_timestamp + module_id)
 
 	def dispose(self):
 		for endpoint in self.endpoints:
+			self.assign_module_id(endpoint, -1)
 			endpoint.remove_listener(self.write)
+		self.logging_modules = {}
+		self.endpoints = []
 		self.log_file.close()
 

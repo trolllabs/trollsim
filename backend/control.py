@@ -108,16 +108,28 @@ class ControlAPI(BaseHTTPRequestHandler):
 		return res
 
 	def start_logging(self):
-		self.logger = DataWriter()
-		self.write('Begin log session.\n')
-		self.send_response_header(200)
+		if not self.logger:
+			try:
+				self.logger = DataWriter()
+				self.write('Begin log session.\n')
+				for module in self.running_modules:
+					self.logger.add_endpoint(self.running_modules[module])
+				return 200
+			except IOError:
+				logging.exception('Datalogger IO error.')
+				return 409
+		else:
+			return 409
 
 	def stop_logging(self):
-		self.logger.dispose()
-		for module in self.running_modules:
-			self.running_modules[module].stop()
-		self.running_modules = {}
-		self.write('End log session.\n')
-		self.logger = None
-		self.send_response_header(200)
+		if self.logger:
+			self.logger.dispose()
+			for module in self.running_modules:
+				self.running_modules[module].stop()
+			self.running_modules = {}
+			self.write('End log session.\n')
+			self.logger = None
+			return 200
+		else:
+			return 409
 

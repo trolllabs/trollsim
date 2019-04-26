@@ -14,17 +14,30 @@ class ObservableComponent(Observable, Thread):
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
 		self.data_source.connect()
+		self.endpoint_id = -1
 		self.running = True
 
 	@property
 	def name(self):
 		return type(self).__name__
 
+	@property
+	def id(self):
+		return self.endpoint_id
+
+	@id.setter
+	def id(self, endpoint_id):
+		self.endpoint_id = endpoint_id
+
 	def parse_data(self):
 		raise NotImplementedError('%s: No parse function implemented!' % self.name)
 
 	def write(self):
 		raise NotImplementedError('%s: No write function implemented!' % self.name)
+
+	def update_listeners(self, packet):
+		packet.module_id = self.id
+		self._notify_listeners(packet)
 
 	def run(self):
 		while self.running:
@@ -68,7 +81,7 @@ class XPlane(ObservableComponent):
 	def parse_data(self, data):
 		name, value = self.packet_parser(data)
 		packet = self.packet_factory.from_name(name, value)
-		self._notify_listeners(packet)
+		self.update_listeners(packet)
 
 
 class WebUI(ObservableComponent):
@@ -92,7 +105,7 @@ class WebUI(ObservableComponent):
 			self.frontend.send(json.dumps(self.meta).encode('utf-8'))
 		else:
 			packet = self.packet_factory.from_binary(data)
-			self._notify_listeners(packet)
+			self.update_listeners(packet)
 
 
 class Arduino(ObservableComponent):
@@ -106,7 +119,7 @@ class Arduino(ObservableComponent):
 			try:
 				packet = self.packet_factory.from_binary(reading)
 				print(packet)
-				self._notify_listeners(packet)
+				self.update_listeners(packet)
 			except KeyError as e:
 				err_msg = 'Arduino metadata %s. Binary packet: %s' % (e, reading.hex().upper())
 				logging.exception(err_msg)
@@ -137,7 +150,7 @@ class iMotions(ObservableComponent):
 			id_lookup = self.fields[data[2]]
 			for index in id_lookup:
 				packet = self.packet_factory.from_id(id_lookup[index], data[int(index)])
-				self._notify_listeners(packet)
+				self.update_listeners(packet)
 		elif data[1] == 'AttentionTool':
 			pass
 
