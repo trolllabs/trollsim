@@ -100,7 +100,7 @@ class WebUI(ObservableComponent):
 		self.frontend.send(packet)
 
 	def parse_data(self, data):
-		if data.decode('utf-8') == 'metadata':
+		if 'metadata' in data.decode('utf-8'):
 			self.frontend.send(json.dumps(self.meta).encode('utf-8'))
 		else:
 			packet = self.packet_factory.from_binary(data)
