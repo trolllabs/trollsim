@@ -20,17 +20,11 @@
 122;Glove pitch;float
 123;Glove yaw;float
 200;imotions begin;NULL
-201;GSR RAW (no units);float
-202;GSR CAL (kOhms);float
 203;GSR CAL (μSiemens);float
-210;ECG LL-RA RAW (no units);float
 211;ECG LL-RA CAL (mVolts);float
-212;ECG LA-RA RAW (no units);float
 213;ECG LA-RA CAL (mVolts);float
-214;ECG Vx-RL RAW (no units);float
 215;ECG Vx-RL CAL (mVolts);float
 216;Heart Rate ECG LL-RA (Beats/min);float
-217;IBI ECG LL-RA (mSecs);float
 220;iMotions SlideshowStart;uint32;local timestamp
 221;iMotions SlideshowStop;uint32;local timestamp
 222;iMotions SlideStart;uint32;local timestamp
