@@ -13,7 +13,6 @@ class ObservableComponent(Observable, Thread):
 		self.metadata = metadata
 		self.data_source = data_source
 		self.packet_factory = PacketFactory(metadata)
-		self.data_source.connect()
 		self.endpoint_id = -1
 		self.endpoint_name = type(self).__name__
 		self.running = True
@@ -45,6 +44,7 @@ class ObservableComponent(Observable, Thread):
 		self._notify_listeners(packet)
 
 	def run(self):
+		self.data_source.connect()
 		while self.running:
 			self.data_source.read()
 
@@ -90,7 +90,6 @@ class XPlane(ObservableComponent):
 
 class WebUI(ObservableComponent):
 	def __init__(self, config, meta):
-		self.meta = meta
 		self.frontend = TCPServer(config)
 		self.frontend.add_listener(self.parse_data)
 
@@ -106,7 +105,8 @@ class WebUI(ObservableComponent):
 
 	def parse_data(self, data):
 		if 'metadata' in data.decode('utf-8'):
-			self.frontend.send(json.dumps(self.meta).encode('utf-8'))
+			print('Metadata requested')
+			self.frontend.send(json.dumps(self.metadata).encode('utf-8'))
 		else:
 			packet = self.packet_factory.from_binary(data)
 			self.update_listeners(packet)
