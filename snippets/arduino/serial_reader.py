@@ -1,9 +1,9 @@
-import serial, struct
+import serial, struct, sys
 from time import sleep
 from serial.tools import list_ports
 
 
-PORT = '/dev/ttyACM0'
+PORT = sys.argv[1]
 
 port_info = next(list_ports.grep(PORT))
 print('Port: %s\nSerial number: %s' % (PORT, port_info.serial_number))
