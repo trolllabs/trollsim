@@ -1,9 +1,23 @@
+import logging
 from misc import DataWriter
 from processors import GloveMultiplier, Tunnel, AudioTrigger
 from http.server import BaseHTTPRequestHandler
 
 
-class ControlAPI(BaseHTTPRequestHandler):
+class AbstractedHTTPHandler(BaseHTTPRequestHandler):
+	def __call__(self, *args):
+		BaseHTTPRequestHandler.__init__(self, *args)
+
+	def send_response_header(self, http_code):
+		self.send_response(http_code)
+		self.send_header('Content-type', 'text/html')
+		self.end_headers()
+
+	def write(self, data):
+		self.wfile.write(data.encode())
+
+
+class ControlAPI(AbstractedHTTPHandler):
 	def __init__(self, modules):
 		self.module_creator = modules
 		self.logger = None
@@ -12,9 +26,6 @@ class ControlAPI(BaseHTTPRequestHandler):
 				'gm': GloveMultiplier(),
 				'at': AudioTrigger()
 				}
-
-	def __call__(self, *args):
-		BaseHTTPRequestHandler.__init__(self, *args)
 
 	def do_GET(self):
 		path = self.path.split('/')[1:]
@@ -35,48 +46,41 @@ class ControlAPI(BaseHTTPRequestHandler):
 				self.run_processor_command(path[1])
 			else:
 				self.run_endpoint_command(path[0], path[1])
+		elif len(path) == 3 and path[0] == 'tunnel':
+			if path[1] in self.running_modules and path[2] in self.running_modules:
+				Tunnel(self.running_modules[path[1]], self.running_modules[path[2]])
+				self.send_response_header(200)
+			else:
+				self.send_response_header(409)
 		else:
 			self.send_response_header(404)
 
-	def send_response_header(self, http_code):
-		self.send_response(http_code)
-		self.send_header('Content-type', 'text/html')
-		self.end_headers()
-
-	def write(self, data):
-		self.wfile.write(data.encode())
-
 	def run_endpoint_command(self, endpoint_name, command):
-		if self.logger:
-			if command == 'start':
-				status_code = self.start_module(endpoint_name)
-				self.send_response_header(status_code)
-			elif command == 'stop':
-				status_code = self.stop_module(endpoint_name)
-				self.send_response_header(status_code)
-			else:
-				self.send_response_header(404)
+		if command == 'start':
+			status_code = self.start_module(endpoint_name)
+			self.send_response_header(status_code)
+		elif command == 'stop':
+			status_code = self.stop_module(endpoint_name)
+			self.send_response_header(status_code)
 		else:
-			self.send_response_header(409)
+			self.send_response_header(404)
 
 	def run_processor_command(self, processor_name):
-		if self.logger:
-			if processor_name in self.processors:
-				for module in self.processors[processor_name].endpoints:
-					self.start_module(module)
-				self.processors[processor_name].set_sources(self.running_modules)
-				self.send_response_header(200)
-		else:
-			self.send_response_header(409)
+		if processor_name in self.processors:
+			for module in self.processors[processor_name].endpoints:
+				self.start_module(module)
+			self.processors[processor_name].set_sources(self.running_modules)
+			self.send_response_header(200)
 
 	def get_status(self):
 		status = 'Trollsim status\n================='
 		if self.logger:
 			status += '\nCurrently logging.'
-			for endpoint in self.running_modules:
-				status += '\n\t%s: running' % endpoint
 		else:
-			status += '\nIdle'
+			status += '\nNot logging'
+		status += '\n\nModules:'
+		for endpoint in self.running_modules:
+			status += '\n\t%s: running' % endpoint
 		status += '\n\n'
 		self.write(status)
 		self.send_response_header(200)
@@ -86,7 +90,8 @@ class ControlAPI(BaseHTTPRequestHandler):
 		if module_name not in self.running_modules:
 			if module_name in self.module_creator.modules:
 				new_module = self.module_creator.create_module(module_name)
-				self.logger.add_endpoint(new_module)
+				if self.logger:
+					self.logger.add_endpoint(new_module)
 				new_module.start()
 				self.running_modules[module_name] = new_module
 			else:
@@ -97,7 +102,7 @@ class ControlAPI(BaseHTTPRequestHandler):
 
 	def stop_module(self, module_name):
 		res = 200
-		print('stopping %s' % module_name)
+		print('Stopping %s' % module_name)
 		if self.running_modules.get(module_name, False):
 			self.running_modules[module_name].stop()
 			del self.running_modules[module_name]
@@ -108,16 +113,28 @@ class ControlAPI(BaseHTTPRequestHandler):
 		return res
 
 	def start_logging(self):
-		self.logger = DataWriter()
-		self.write('Begin log session.\n')
-		self.send_response_header(200)
+		if not self.logger:
+			try:
+				self.logger = DataWriter(self.module_creator.config, self.module_creator.meta)
+				self.write('Begin log session.\n')
+				for module in self.running_modules:
+					self.logger.add_endpoint(self.running_modules[module])
+				return 200
+			except IOError:
+				logging.exception('Datalogger IO error.')
+				return 409
+		else:
+			return 409
 
 	def stop_logging(self):
-		self.logger.dispose()
-		for module in self.running_modules:
-			self.running_modules[module].stop()
-		self.running_modules = {}
-		self.write('End log session.\n')
-		self.logger = None
-		self.send_response_header(200)
+		if self.logger:
+			self.logger.end_session()
+			for module in self.running_modules:
+				self.running_modules[module].stop()
+			self.running_modules = {}
+			self.write('End log session.\n')
+			self.logger = None
+			return 200
+		else:
+			return 409
 

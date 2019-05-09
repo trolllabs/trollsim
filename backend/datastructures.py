@@ -21,6 +21,7 @@ class TrollPacket:
 		self.metadata = metadata
 		self.binary_packet = binary_packet
 		self.timestamp = int(perf_counter()*1000)
+		self.module_id = -1
 
 		if type(value) == str:
 			if metadata['type'] == 'float':

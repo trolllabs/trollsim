@@ -1,7 +1,7 @@
-#define FLEX_ID  120
-#define ROLL_ID  121
-#define PITCH_ID 122
-#define YAW_ID   123
+#define FLEX_ID  1
+#define ROLL_ID  2
+#define PITCH_ID 3
+#define YAW_ID   4
 float flex_output;
 float roll_output;
 float pitch_output;

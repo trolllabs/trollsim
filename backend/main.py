@@ -1,16 +1,9 @@
-import sys, logging, json, argparse
+import sys, logging
 from control import ControlAPI
-from misc import metadata_parser
+from misc import metadata_parser, ArgparseHelper, load_configs
 from patterns import ModuleFactory
 from endpoints import XPlane, WebUI, Arduino, iMotions, AudioSocket
 from http.server import HTTPServer
-
-
-class ArgparseHelper(argparse.ArgumentParser):
-	def error(self, message):
-		sys.stderr.write('error: %s\n' % message)
-		self.print_help()
-		sys.exit(2)
 
 
 parser = ArgparseHelper()
@@ -23,14 +16,6 @@ parser.add_argument('-s', '--save', action='store_true', default=False,
 args = parser.parse_args()
 
 
-def load_configs(args):
-	with open(args.file, 'r') as f:
-		component_config = json.load(f)
-	with open(args.meta, 'r') as f:
-		metadata_config = metadata_parser(f)
-	return component_config, metadata_config
-
-
 def run(modules):
 	api = ControlAPI(modules)
 	port = 5050
@@ -40,8 +25,6 @@ def run(modules):
 
 
 def main():
-	# Define headers.
-	logging.basicConfig(level=logging.DEBUG, filename='log.txt')
 	config, meta = load_configs(args)
 	modules = ModuleFactory(config, meta)
 
@@ -56,5 +39,18 @@ def main():
 
 
 if __name__ == "__main__":
+	log_format = '%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s'
+	log_formatter = logging.Formatter(log_format)
+
+	consoleHandler = logging.StreamHandler()
+	consoleHandler.setFormatter(log_formatter)
+
+	fileHandler = logging.FileHandler('error_log.txt')
+	fileHandler.setFormatter(log_formatter)
+
+	error_logger = logging.getLogger()
+	error_logger.addHandler(consoleHandler)
+	error_logger.addHandler(fileHandler)
+
 	main()
 

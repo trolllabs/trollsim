@@ -29,9 +29,6 @@ class PacketFactory:
 	def __init__(self, metadata):
 		self.lookup = metadata
 
-	def to_binary(self, data_id, data):
-		return struct.pack('>B %s' % type_lookup[type(data)], data_id, data)
-
 	def from_binary(self, binary_packet):
 		packet_id = binary_packet[0]
 		return TrollPacket(self.lookup['ids'][str(packet_id)], binary_packet=binary_packet)
@@ -53,5 +50,7 @@ class ModuleFactory:
 		self.modules[name] = lambda : classtype(self.config[name], self.meta)
 
 	def create_module(self, name):
-		return self.modules[name]()
+		new_module =  self.modules[name]()
+		new_module.name = name
+		return new_module
 
