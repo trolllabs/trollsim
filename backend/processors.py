@@ -10,9 +10,24 @@ class Tunnel:
 		input_source.add_listener(output_source.write)
 
 
-class AudioTrigger:
+class Processor:
 	def __init__(self):
-		self.endpoints = ['alarmbox', 'audiosocket']
+		self.data_sources = {}
+
+	def route_data(self, source, callback):
+		source.add_listener(callback)
+		self.data_sources[source] = callback
+
+	def end_session(self):
+		for source in self.data_sources:
+			source.remove_listener(self.data_sources[source])
+		self.data_sources = {}
+
+
+class AudioTrigger(Processor):
+	def __init__(self):
+		Processor.__init__(self)
+		self.endpoints = ['audiosocket', 'alarmbox-slave']
 
 	def send_signal(self, packet):
 		if packet.id == 14:
@@ -21,12 +36,12 @@ class AudioTrigger:
 			self.audiosocket.write(packet)
 
 	def set_sources(self, endpoints: dict):
-		self.alarmbox = endpoints['alarmbox']
 		self.audiosocket = endpoints['audiosocket']
-		self.alarmbox.add_listener(self.send_signal)
+		alarmbox = endpoints['alarmbox-slave']
+		self.route_data(alarmbox, self.send_signal)
 
 
-class GloveMultiplier:
+class GloveMultiplier(Processor):
 	'''
 	Takes a datastream from the glove arduino and multiplies it with
 	self.data_multipliers. data_multipliers can be changed through
@@ -40,6 +55,7 @@ class GloveMultiplier:
 	[glove_arduino] -> [frontend]
 	'''
 	def __init__(self):
+		Processor.__init__(self)
 		self.multipliers = {}
 		self.endpoints = ['frontend', 'glove', 'xplane']
 
@@ -51,9 +67,10 @@ class GloveMultiplier:
 		self.frontend.write(packet*self.multipliers.get(packet.name, 1))
 
 	def set_sources(self, endpoints: dict):
-		self.frontend = endpoints['frontend']
 		self.xplane = endpoints['xplane']
-		self.glove = endpoints['glove']
-		self.glove.add_listener(self.glove_handler)
-		self.frontend.add_listener(self.update_multipliers)
+		self.frontend = endpoints['frontend']
+		self.route_data(self.frontend, self.update_multipliers)
+
+		glove = endpoints['glove']
+		self.route_data(glove, self.glove_handler)
 

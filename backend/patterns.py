@@ -29,6 +29,10 @@ class ModuleFactory:
 	def __init__(self, config):
 		self.config = config
 		self.modules = {}
+		self.processors = {}
+
+	def new_processor(self, name, classtype):
+		self.processors[name] = classtype()
 
 	def new_module(self, name, classtype):
 		self.modules[name] = lambda : classtype(self.config[name])
