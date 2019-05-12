@@ -55,8 +55,8 @@ bool active = 0; //0 or 1, decides if it will trigger alarms or not
 
 int alarms = 1; //value to hold number of alarms that will be triggered in total before device becomes inactive again
 int currentAlarm = 0; //counter counting how many alarms have happened
-int minPeriod = 50000; // input in seconds here minimum time period between alarms
-int maxPeriod = 70000; // input in seconds here maximum time period between
+unsigned long  minPeriod = 50000; // input in seconds here minimum time period between alarms
+unsigned long  maxPeriod = 70000; // input in seconds here maximum time period between
 
 byte rVal = 0;
 
