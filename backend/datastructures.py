@@ -11,27 +11,46 @@ class TrollPacket:
 		raw_data (binary): Packet data
 		data (int/float):  Interpreted packet data
 	'''
-	def __init__(self, metadata, value=None, binary_packet=None):
-		if (binary_packet == None) and (value == None):
-			msg = 'TrollPacket: Missing value. (Was the packet instanciated outside PacketFactory?)'
-			raise ValueError(msg)
-		elif binary_packet == value:
-			msg = 'TrollPacket: binary and value should not be the same'
-			raise AttributeError(msg)
-		self.metadata = metadata
+	meta = None
+	def __init__(self, packet_meta, binary_packet, value=None):
 		self.binary_packet = binary_packet
+		self.metadata = packet_meta
 		self.timestamp = int(perf_counter()*1000)
 		self.module_id = -1
+		if value:
+			self.value = value
+		else:
+			self.value = self.from_binary(self.binary_value)
 
+	def _cast_value(metadata, value):
 		if type(value) == str:
-			if metadata['type'] == 'float':
-				self.data = float(value)
+			if 'float' in metadata['type']:
+				value = float(value)
 			elif 'int' in metadata['type']:
-				self.data = int(value)
+				value = int(value)
 			else:
 				raise ValueError('Metadata error. %s' % metadata)
-		else:
-			self.data = value
+		return value
+
+	def _create_network_packet(packet_meta, value):
+		return struct.pack('>B %s' % type_lookup[type(value)], packet_meta['id'], value)
+
+	def _create_packet(packet_meta, value):
+		packet_value = TrollPacket._cast_value(packet_meta, value)
+		binary_packet = TrollPacket._create_network_packet(packet_meta, packet_value)
+		return TrollPacket(packet_meta, binary_packet, value)
+
+	def from_name(name, value):
+		packet_meta = TrollPacket.meta['names'][name]
+		return TrollPacket._create_packet(packet_meta, value)
+
+	def from_id(packet_id, value):
+		packet_meta = TrollPacket.meta['ids'][str(packet_id)]
+		return TrollPacket._create_packet(packet_meta, value)
+
+	def from_binary_packet(network_packet):
+		packet_meta = TrollPacket.meta['ids'][str(network_packet[0])]
+		return TrollPacket(packet_meta, network_packet)
 
 	@property
 	def id(self):
@@ -60,12 +79,6 @@ class TrollPacket:
 		return struct.unpack('>' + type_lookup[self.type], binary_value)[0]
 
 	@property
-	def value(self):
-		if self.data == None:
-			self.data = self.from_binary(self.binary_value)
-		return self.data
-
-	@property
 	def hex(self):
 		return '0x' + self.binary.hex().upper()
 
@@ -81,7 +94,8 @@ class TrollPacket:
 		return retval
 
 	def _new_packet(self, new_value):
-		return TrollPacket(self.metadata, value=new_value)
+		binary_packet = TrollPacket._create_network_packet(self.metadata, new_value)
+		return TrollPacket(self.metadata, binary_packet, new_value)
 
 	def __add__(self, addend):
 		addend = self._native_typecheck(addend)

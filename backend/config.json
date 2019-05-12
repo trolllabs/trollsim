@@ -72,5 +72,10 @@
 		"name": "Alarm Box",
 		"sn": "85439303133351D0B002",
 		"baudrate": 115200
+	},
+	"alarmbox-slave": {
+		"name": "Slave Box",
+		"sn": "7533832353535140E1C2",
+		"baudrate": 115200
 	}
 }
