@@ -24,7 +24,7 @@ servo_mult = multiplier to convert to milliseconds
 p = location of servo rotation points in base frame [x/y][1-6]
 re = location of attachment points in end effector frame [x/y][1-6]
 */
-const int servo_pin[] = {6,9,10,11,3,5}, servo_zero[6] = {1710, 1280, 1700, 1300, 1680, 1300};
+const int servo_pin[] = {3,5,6,9,10,11}, servo_zero[6] = {1300, 1500, 1275, 1650, 1250, 1600};
 /*
 servo_pin = servo pin assignments,
 servo_zero = zero angles for each servo (horizontal)
@@ -48,7 +48,7 @@ delay(1000);
 void loop()
 {
 static float pe[6] = {0,0,0,radians(0),radians(0),radians(0)}, theta_a[6], servo_pos[6],
-q[3][6], r[3][6], dl[3][6], dl2[9];
+q[3][6], r[3][6], dl[3][6], dl2[3];
 /*
 pe = location and orientation of end effector frame relative to the base frame [sway, surge,
 heave, pitch, roll, yaw)

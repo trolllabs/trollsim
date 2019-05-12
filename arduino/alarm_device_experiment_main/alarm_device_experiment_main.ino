@@ -1,5 +1,3 @@
-
-
 const int packet_size = 6;
 
 typedef union {
@@ -39,10 +37,8 @@ void write_int(char id, int value16) {
   write_long(id, value32);
 }
 
-#include <Servo.h>
-#define in1 11 //first pin for fan control
-#define in2 12 // second pin for fan controol
-Servo myservo;  // create servo object to control a servo
+#include <Wire.h>
+
 
 int bPin1 = 2; //pin number 1st button
 int bPin2 = 3; //pin number 2nd button
@@ -50,28 +46,48 @@ int bPin3 = 4; //pin number 3rd button
 bool bVal1 = LOW; //value read from button 1
 bool bVal2 = LOW; //value read from button 2
 bool bVal3 = LOW; //value read from button 3
-int ledPin1 = 13;  //pin number 1st led (disabled, set to pin 5 to activate)
-int ledPin2 = 13;  //pin number 2nd led (disabled, set to pin 6 to activate)
-int ledPin3 = 13;  //pin number 3rd led (disabled, set to pin 7 to activate) 
-//int speakerPin = 9; //pin number speaker
 int activePin = 8; //digital pin triggering device on/off.
-int smellPin = 10; //pin for servo controlling smell device
+int alarmTypePin = 9; //digital pin triggering which alarm system is active
+int knobValue = 0;
+int scenarioValue = 0;
 
 bool active = 0; //0 or 1, decides if it will trigger alarms or not
 
-int alarms = 5; //number of alarms that will be triggered in total before device becomes inactive again
+int alarms = 1; //value to hold number of alarms that will be triggered in total before device becomes inactive again
 int currentAlarm = 0; //counter counting how many alarms have happened
 int minPeriod = 3000; // input in seconds here minimum time period between alarms
-int maxPeriod = 9000; // input in seconds here maximum time period between
-int rVal = 0;
+int maxPeriod = 5000; // input in seconds here maximum time period between
+
+byte rVal = 0;
+
+int scen1Alarms = 2; //value deciding number of alarms in scenario 1
+int scen2Alarms = 3; //value deciding number of alarms in scenario 2
+int scen3Alarms = 5; //value deciding number of alarms in scenario 3
 
 unsigned long currentTime = 0; //var to store current time using millis(), to be updated throughout
 unsigned long startTime = 0; //time when alarm starts
 unsigned long responseTime = 0; //response time to react to alarm
-unsigned long alarmPeriod = 5000; //var in milliseconds that decides how long the alarm should sound before alarm task is failed due to no action.
+unsigned long alarmPeriod = 10000; //var in milliseconds that decides how long the alarm should sound before alarm task is failed due to no action.
 unsigned long randomPeriod = 0; //Variable to hold ranomized waiting time untill alarm is triggered
 unsigned long limitTime = 0; //Variable to hold time limit where alarm task is failed due to no action
 
+int alarmType = 0; // Set to 0 for system A (light, sound) and 1 for system B (light, sound, haptic)
+int alarmSystemMod = 0; //Variable adjusting rVal in line with what system is active
+
+int scenarioKnob() {
+  int sensorValue = analogRead(A3);
+  if (sensorValue >= 0 && sensorValue < 100) {
+    knobValue = 1;
+  }
+  if (sensorValue >= 100 && sensorValue < 923) {
+    knobValue = 2;
+  }
+  if (sensorValue >= 924) {
+    knobValue = 3;
+  }
+  //Serial.println(knobValue);
+  return knobValue;
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -80,11 +96,9 @@ void setup() {
   pinMode(bPin1, INPUT);
   pinMode(bPin2, INPUT);
   pinMode(bPin3, INPUT);
-  pinMode(ledPin1, OUTPUT);
-  pinMode(ledPin2, OUTPUT);
-  pinMode(ledPin3, OUTPUT);
-  myservo.attach(10);  // attaches the servo on pin 10 to the servo object
   Serial.begin(115200);
+
+  Wire.begin(); //join i2c bus
   randomSeed(analogRead(0));
 
 }
@@ -99,12 +113,35 @@ void loop() {
 
 
   active = digitalRead(activePin); //Read value of on-switch
+  alarmType = digitalRead(alarmTypePin); //Real value of alarmTypePin, deciding which system should be used.
+
   if (active == HIGH && currentAlarm < alarms) {
-    write_int(11, 1); //informs of alarm type being smell
     write_int(12, 1); //Sends alarm=armed
-
   }
-
+  if (alarmType == 0) {
+    alarmSystemMod = 0;
+    //Serial.println("System A (light, sound) is active.");
+  }
+  if (alarmType == 1) {
+    alarmSystemMod = 3;
+    //Serial.println("System B (light, sound, haptic) is active.");
+  }
+  scenarioValue = scenarioKnob();
+  write_int(17, scenarioValue); //Sends if scenario 1, 2 or 3 is active
+  
+  if (scenarioValue == 1) {
+    alarms = scen1Alarms;
+    //Serial.println("Scenario 1 active");
+  }
+  if (scenarioValue == 2) {
+    alarms = scen2Alarms;
+    //Serial.println("Scenario 2 active");
+  }
+  if (scenarioValue == 3) {
+    alarms = scen3Alarms;
+    //Serial.println("Scenario 3 active");
+  }
+  
   while (active == HIGH && currentAlarm < alarms) {      //Condition to execute when device is on/armed.
     ++currentAlarm; //Increments alarm counter by 1
     write_int(13, currentAlarm); //Sends alarm number
@@ -114,12 +151,14 @@ void loop() {
     limitTime = currentTime + randomPeriod + alarmPeriod; //time where alarm task is failed due to no action
     delay(randomPeriod);
     rVal = random(1, 4);
+    //Serial.println(rVal);
     switch (rVal) {
       case 1: //Alarm scenario 1
         write_int(14, rVal); //Sends ID of the triggeder alarm
         startTime = millis();
-        digitalWrite(ledPin1, HIGH); //light led1
-        smellAlarm(1); //trigger smell alarm 1
+
+        writeToSlave(rVal + alarmSystemMod);
+
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -137,14 +176,14 @@ void loop() {
             write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
-        digitalWrite(ledPin1, LOW); //darken led1
         break;
-      case 2: //Alarm scenario 1
+      case 2: //Alarm scenario 2
         write_int(14, rVal); //Sends ID of the triggeder alarm
         //Serial.println("Alarm 2 triggered");
         startTime = millis();
-        digitalWrite(ledPin2, HIGH); //light led2
-        smellAlarm(2); //trigger smell alarm 2
+
+        writeToSlave(rVal + alarmSystemMod);
+
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -162,14 +201,14 @@ void loop() {
             write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
-        digitalWrite(ledPin2, LOW); //darken led2
         break;
       case 3: //Alarm scenario 3
         write_int(14, rVal); //Sends ID of the triggeder alarm
         //Serial.println("Alarm 3 triggered");
         startTime = millis();
-        digitalWrite(ledPin3, HIGH); //light led3
-        smellAlarm(3); //trigger smell alarm 3
+
+        writeToSlave(rVal + alarmSystemMod);
+
         while (currentTime < limitTime) {
           bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
@@ -187,7 +226,6 @@ void loop() {
             write_int(15, 2); //Sends result of alarm test being failed due to inactivity
           }
         }
-        digitalWrite(ledPin3, LOW); //darken led2
         break;
       default:
         write_int(15, rVal); //Sends that alarm number was invalid
@@ -195,7 +233,7 @@ void loop() {
         break;
     }
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
-    smellAlarm(0); //Put smell cartridge in neutral position
+    writeToSlave(0);
   }
 
   //Serial.println("Device disarmed");
@@ -218,31 +256,9 @@ bool buttonCheck(bool bValX, int buttonPinX) {
   return newBValX;
 }
 
-void smellAlarm(int smellAlarmNumber) {
-  switch (smellAlarmNumber) {
-    case 1: //Alarm scenario 1
-      //Serial.println("smellAlarm 1 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(1);
-      break;
-    case 2: //Alarm secnario 2
-      //Serial.println("smellAlarm 2 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(120);
-      break;
-    case 3: //ALarm scenario 3
-      //Serial.println("smellAlarm 3 triggered");
-      digitalWrite(in1, HIGH);
-      digitalWrite(in2, LOW);
-      myservo.write(180);
-      break;
-    default:
-      //Serial.println("Returned to 0");
-      digitalWrite(in1, LOW);
-      digitalWrite(in2, HIGH);
-      myservo.write(60);
-      break;
-  }
+
+void writeToSlave(byte alarmNumber) {
+  Wire.beginTransmission(1); ///transmit   to device #1
+  Wire.write(alarmNumber);
+  Wire.endTransmission();
 }

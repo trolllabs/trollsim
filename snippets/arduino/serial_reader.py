@@ -30,7 +30,7 @@ while True:
 		# Test float data
 		# 0x9EEF8340 test float: 4.123
 		# 0x05D4F642 test2 float: 123.4141
-		print('struct unpack float:', struct.unpack('>f', sensor_data)[0])
+		#print('struct unpack float:', struct.unpack('>f', sensor_data)[0])
 
 		# Test int32 data
 		print('struct unpack int:', struct.unpack('>i', sensor_data)[0])

@@ -59,10 +59,10 @@ void loop() {
   axisVal1=map(angle1,0, 90, 0, 255);
   axisVal2=map(angle2,0, 90, 0, 255);  
 
-    analogWrite(motor1, axisVal2);
+    //analogWrite(motor1, axisVal2);
     analogWrite(motor2, axisVal1);
-    analogWrite(motor3, axisVal2);
-    analogWrite(motor4, axisVal1);
+    //analogWrite(motor3, axisVal2);
+    analogWrite(motor4, axisVal2);
 
   //delay(10);
 
