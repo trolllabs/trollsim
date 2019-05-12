@@ -81,7 +81,7 @@ int A3Amplitude = 4;  //Amplitude in [V] of alarm 1's haptic feedback. Input val
 void setup() {
   Wire.begin(1);                // join i2c bus with address #1
   Wire.onReceive(receiveEvent); // register event
-  Serial.begin(9600);           // start serial for output
+  Serial.begin(115200);           // start serial for output
   pinMode(ledPin1, OUTPUT); //set pinmode on LED-pin 1
   pinMode(ledPin2, OUTPUT); //set pinmode on LED-pin 2
   pinMode(ledPin3, OUTPUT); //set pinmode on LED-pin 3
