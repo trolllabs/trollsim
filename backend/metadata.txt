@@ -9,6 +9,8 @@
 13;Alarm number;int
 14;Alarm triggered;int
 15;Alarm test result;int
+16;Slave audio alarm;int
+17;Alarm scenario;int
 50;frontend begin;NULL
 51;Throttle slider;float
 52;Roll slider;float

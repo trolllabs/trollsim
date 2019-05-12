@@ -37,6 +37,7 @@ def main():
 	modules.new_module('alarmbox', Arduino)
 	modules.new_module('imotions', iMotions)
 	modules.new_module('audiosocket', AudioSocket)
+	modules.new_module('alarmbox-slave', Arduino)
 	modules.new_processor('gm', GloveMultiplier)
 	modules.new_processor('at', AudioTrigger)
 

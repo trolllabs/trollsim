@@ -30,9 +30,7 @@ class AudioTrigger(Processor):
 		self.endpoints = ['audiosocket', 'alarmbox-slave']
 
 	def send_signal(self, packet):
-		if packet.id == 14:
-			self.audiosocket.write(packet)
-		if packet.id == 15:
+		if packet.id == 16:
 			self.audiosocket.write(packet)
 
 	def set_sources(self, endpoints: dict):
