@@ -2,17 +2,18 @@ module.exports = {
 	init: initConnections
 }
 
+const WebSocket = require('ws');
+const tcp_client = require('./tcp_client')
 var metadata;
+var wss;
 function initConnections(http) {
-	const WebSocket = require('ws');
-	const wss = new WebSocket.Server({ server: http });
+	wss = new WebSocket.Server({ server: http });
 	wss.on('connection', wssConnectionHandler);
 	wss.on('close', function close() {
 		console.log('A client disconnected.');
 	});
 
 
-	var tcp_client = require('./tcp_client')
 	tcp_client.setHandler(getSocketData);
 	var socket_client = tcp_client.connect('localhost', 8005);
 	socket_client.on('connect', function () {
@@ -56,10 +57,11 @@ function getSocketData(message) {
 			value = message.readFloatBE(1);
 		else
 			value = message.readInt32BE(1);
-			wss.clients.forEach(function each(client) {
-				if (client.readyState == WebSocket.OPEN) {
-					client.send(id + ' ' + value);
-				}
+
+		wss.clients.forEach(function each(client) {
+			if (client.readyState == WebSocket.OPEN) {
+				client.send(id + ' ' + value);
+			}
 		});
 	}
 }
