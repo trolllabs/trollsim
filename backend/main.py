@@ -3,6 +3,7 @@ from control import ControlAPI
 from misc import metadata_parser, ArgparseHelper, load_configs
 from patterns import ModuleFactory
 from endpoints import XPlane, WebUI, Arduino, iMotions, AudioSocket
+from datastructures import TrollPacket
 from http.server import HTTPServer
 
 
@@ -26,7 +27,8 @@ def run(modules):
 
 def main():
 	config, meta = load_configs(args)
-	modules = ModuleFactory(config, meta)
+	modules = ModuleFactory(config)
+	TrollPacket.meta = meta
 
 	modules.new_module('xplane', XPlane)
 	modules.new_module('frontend', WebUI)

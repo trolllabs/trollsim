@@ -1,18 +1,17 @@
 import struct, json, sys, logging
 from threading import Thread
 from protocols import UDPClient, UDPServer, TCPServer, TCPClient, Serial, Bluetooth
+from datastructures import TrollPacket
 from misc import type_lookup, XPlaneDataAdapter
-from patterns import Observable, PacketFactory
+from patterns import Observable
 
 
 class ObservableComponent(Observable, Thread):
-	def __init__(self, metadata, data_source, extra_protocols=[]):
+	def __init__(self, data_source, extra_protocols=[]):
 		Observable.__init__(self)
 		Thread.__init__(self)
 		self.protocols = extra_protocols
-		self.metadata = metadata
 		self.data_source = data_source
-		self.packet_factory = PacketFactory(metadata)
 		self.endpoint_id = -1
 		self.endpoint_name = type(self).__name__
 		self.running = True
@@ -60,12 +59,12 @@ class XPlane(ObservableComponent):
 	'''
 	Explain why read and write socket
 	'''
-	def __init__(self, config, meta):
+	def __init__(self, config):
 		self.xp_write = UDPClient(config['write'])
 		self.xp_read = UDPServer(config['read'])
 		self.xp_read.add_listener(self.parse_data)
 
-		ObservableComponent.__init__(self, meta, self.xp_read, [self.xp_write])
+		ObservableComponent.__init__(self, self.xp_read, [self.xp_write])
 		self.adapter = XPlaneDataAdapter()
 
 	def write(self, trollpacket):
@@ -79,21 +78,21 @@ class XPlane(ObservableComponent):
 		should be the only accepted write argument.
 		Intended for debugging purposes.
 		'''
-		packet = self.packet_factory.from_name(name, value)
+		packet = TrollPacket.from_name(name, value)
 		self.write(packet)
 
 	def parse_data(self, data):
 		name, value = self.adapter.parse_from_dref(data)
-		packet = self.packet_factory.from_name(name, value)
+		packet = TrollPacket.from_name(name, value)
 		self.update_listeners(packet)
 
 
 class WebUI(ObservableComponent):
-	def __init__(self, config, meta):
+	def __init__(self, config):
 		self.frontend = TCPServer(config)
 		self.frontend.add_listener(self.parse_data)
 
-		ObservableComponent.__init__(self, meta, self.frontend)
+		ObservableComponent.__init__(self, self.frontend)
 
 	def write(self, trollpacket):
 		self.frontend.send(trollpacket.binary)
@@ -105,23 +104,23 @@ class WebUI(ObservableComponent):
 
 	def parse_data(self, data):
 		if 'metadata' in data.decode('utf-8'):
-			print('Metadata requested')
-			self.frontend.send(json.dumps(self.metadata).encode('utf-8'))
+			print('WebUI: Metadata requested')
+			self.frontend.send(json.dumps(TrollPacket.meta).encode('utf-8'))
 		else:
-			packet = self.packet_factory.from_binary(data)
+			packet = TrollPacket(data)
 			self.update_listeners(packet)
 
 
 class Arduino(ObservableComponent):
-	def __init__(self, config, meta):
+	def __init__(self, config):
 		self.arduino = Serial(config)
 		self.arduino.add_listener(self.parse_data)
-		ObservableComponent.__init__(self, meta, self.arduino)
+		ObservableComponent.__init__(self, self.arduino)
 
 	def parse_data(self, reading):
 		if len(reading) == 5:
 			try:
-				packet = self.packet_factory.from_binary(reading)
+				packet = TrollPacket.from_binary_packet(reading)
 				print(packet)
 				self.update_listeners(packet)
 			except KeyError as e:
@@ -130,7 +129,7 @@ class Arduino(ObservableComponent):
 
 
 class iMotions(ObservableComponent):
-	def __init__(self, config, meta, log=False):
+	def __init__(self, config, log=False):
 		self.receiver = UDPServer(config)
 		self.receiver.add_listener(self.parse_data)
 		self.fields = {
@@ -153,16 +152,16 @@ class iMotions(ObservableComponent):
 		if data[2] in self.fields:
 			id_lookup = self.fields[data[2]]
 			for index in id_lookup:
-				packet = self.packet_factory.from_id(id_lookup[index], data[int(index)])
+				packet = TrollPacket.from_id(index_id_dict[index], data[int(index)])
 				self.update_listeners(packet)
 		elif data[1] == 'AttentionTool':
 			pass
 
 
 class AudioSocket(ObservableComponent):
-	def __init__(self, config, meta):
+	def __init__(self, config):
 		self.sender = TCPClient(config)
-		ObservableComponent.__init__(self, meta, self.sender)
+		ObservableComponent.__init__(self, self.sender)
 
 	def write(self, packet):
 		self.sender.send(str(packet.value).encode('utf-8'))
