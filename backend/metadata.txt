@@ -25,7 +25,10 @@
 213;ECG LA-RA CAL (mVolts);float
 215;ECG Vx-RL CAL (mVolts);float
 216;Heart Rate ECG LL-RA (Beats/min);float
-220;iMotions SlideshowStart;uint32;local timestamp
-221;iMotions SlideshowStop;uint32;local timestamp
-222;iMotions SlideStart;uint32;local timestamp
-223;iMotions SlideStop;uint32;local timestamp
+220;SlideshowStart;uint32;local timestamp
+221;SlideshowStop;uint32;local timestamp
+222;SlideStart;uint32;local timestamp
+223;SlideStop;uint32;local timestamp
+224;GazeCalibrationStart;uint32;local timestamp
+225;GazeCalibrationEnd;uint32;local timestamp
+226;ExposureStatistics;None

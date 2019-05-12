@@ -133,12 +133,8 @@ class iMotions(ObservableComponent):
 	def __init__(self, config, log=False):
 		self.receiver = UDPServer(config)
 		self.receiver.add_listener(self.parse_data)
-		self.fields = {
-				'GSR': config['sensors']['Shimmer/GSR'],
-				'ECG': config['sensors']['Shimmer/ECG'],
-				}
-
-		ObservableComponent.__init__(self, meta, self.receiver)
+		self.imotions_sensors = config['sensors']
+		ObservableComponent.__init__(self, self.receiver)
 
 		self.log_file = None
 		if log:
@@ -150,13 +146,19 @@ class iMotions(ObservableComponent):
 
 		imotions_packet = imotions_packet.decode('utf-8').strip()
 		data = imotions_packet.split(';')
-		if data[2] in self.fields:
-			id_lookup = self.fields[data[2]]
-			for index in id_lookup:
+		#if data[1] in self.imotions_sensors:
+		if 'GSR' in data[1]:
+			index_id_dict = self.imotions_sensors[data[1]]
+			for index in index_id_dict:
 				packet = TrollPacket.from_id(index_id_dict[index], data[int(index)])
 				self.update_listeners(packet)
 		elif data[1] == 'AttentionTool':
+			if data[2] in TrollPacket.metadata['names']:
+				print(data)
+				pass
 			pass
+		else:
+			raise KeyError('Unknown iMotions event source: %s.\nFull packet: %s' % (data[1], data))
 
 
 class AudioSocket(ObservableComponent):
