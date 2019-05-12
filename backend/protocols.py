@@ -20,6 +20,10 @@ class ObservableReading(Observable):
 	'''
 	Force method implementation for children classes
 	'''
+	def __init__(self):
+		self.ready = False
+		Observable.__init__(self)
+
 	def connect(self):
 		raise NotImplementedError('ObservableReading: No connect function implemented!')
 
@@ -48,7 +52,7 @@ class UDPClient(ObservableReading):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def connect(self):
-		pass # Does not need to
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:
@@ -81,7 +85,7 @@ class UDPServer(ObservableReading):
 		print('UDP server listening at %s %s' % (config['ip'], config['port']))
 
 	def connect(self):
-		pass # Does not need to
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:
@@ -106,6 +110,7 @@ class TCPClient(ObservableReading):
 
 	def connect(self):
 		self.sock.connect(self.address)
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:
@@ -149,6 +154,7 @@ class TCPServer(ObservableReading):
 	def connect(self):
 		self.conn, self.addr = self.sock.accept()
 		print('TCPServer: new connection', self.addr)
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:
@@ -201,6 +207,7 @@ class Serial(ObservableReading):
 				logging.exception(self.config)
 			print('Could not establish connection. Retrying.')
 			sleep(3)
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:
@@ -232,6 +239,7 @@ class Bluetooth(ObservableReading):
 				print('Bluetooth error: ', e)
 				print('Retrying')
 			sleep(2)
+		self.ready = True
 
 	def send(self, message):
 		with self.lock:

@@ -95,7 +95,8 @@ class WebUI(ObservableComponent):
 		ObservableComponent.__init__(self, self.frontend)
 
 	def write(self, trollpacket):
-		self.frontend.send(trollpacket.binary)
+		if self.frontend.ready:
+			self.frontend.send(trollpacket.binary)
 
 	def external_write(self, data_id, value):
 		packet = struct.pack('>B i', data_id, value)
