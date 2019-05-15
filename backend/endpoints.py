@@ -130,35 +130,46 @@ class Arduino(ObservableComponent):
 
 
 class iMotions(ObservableComponent):
-	def __init__(self, config, log=False):
+	def __init__(self, config):
 		self.receiver = UDPServer(config)
 		self.receiver.add_listener(self.parse_data)
-		self.imotions_sensors = config['sensors']
+		self.sensors = {
+				'Shimmer/GSR': {
+					'GSR CAL (μSiemens)': 12
+				},
+				'Shimmer/ECG': {
+					'ECG LL-RA CAL (mVolts)': 12,
+					'ECG LA-RA CAL (mVolts)': 14,
+					'ECG Vx-RL CAL (mVolts)': 17
+				}
+			}
 		ObservableComponent.__init__(self, self.receiver)
 
-		self.log_file = None
-		if log:
-			self.log_file = open('imotions%s.log' % int(time()), 'w')
+	def notify(self, packet):
+		'''
+		Since parse_data has multiple 'exits', this is for easier
+		(print) debugging. All exits converges here except for KeyError
+		'''
+		self.update_listeners(packet)
 
 	def parse_data(self, imotions_packet):
-		if self.log_file:
-			self.log_file.write(imotions_packet)
-
 		imotions_packet = imotions_packet.decode('utf-8').strip()
 		data = imotions_packet.split(';')
-		#if data[1] in self.imotions_sensors:
-		if 'GSR' in data[1]:
-			index_id_dict = self.imotions_sensors[data[1]]
-			for index in index_id_dict:
-				packet = TrollPacket.from_id(index_id_dict[index], data[int(index)])
-				self.update_listeners(packet)
+		if data[1] in self.sensors:
+			sensor = self.sensors[data[1]]
+			for channel in sensor:
+				index = sensor[channel]
+				packet = TrollPacket.from_name(channel, data[index])
+				self.notify(packet)
 		elif data[1] == 'AttentionTool':
-			if data[2] in TrollPacket.metadata['names']:
-				print(data)
-				pass
-			pass
+			if data[2] == 'ExposureStatistics':
+				print(imotions_packet) # Skip
+			elif data[2] in TrollPacket.meta['names']:
+				timestamp = data[5]
+				packet = TrollPacket.from_name(data[2], timestamp[8:])
+				self.notify(packet)
 		else:
-			raise KeyError('Unknown iMotions event source: %s.\nFull packet: %s' % (data[1], data))
+			raise KeyError('Unknown iMotions packet: %s. Full packet: %s' % (data[1], data))
 
 
 class AudioSocket(ObservableComponent):
