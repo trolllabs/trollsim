@@ -4,7 +4,7 @@ WRITTEN FOR WINDOWS
 Play wav file based on socket signal
 '''
 
-import socket
+import socket, struct
 from winsound import SND_LOOP as LOOP
 from winsound import PlaySound, SND_FILENAME, SND_ASYNC
 from ctypes import POINTER, cast
@@ -48,12 +48,16 @@ def playAudio(audio_path, loop=0):
 def stopAudio():
 	playAudio(None)
 
+def parse_packet(meta, packet):
+	packet_id = packet[0]
+	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
 
 def main():
 	port = 5050
-	track1 = 'sine.wav'
-	track2 = 'sine.wav'
-	track3 = 'sine.wav'
+	track1 = 'assets/sine.wav'
+	track2 = 'assets/sine.wav'
+	track3 = 'assets/sine.wav'
+	meta = {16: 'i', "TODO": 'i', "TODO2": 'f'}
 
 	devices = AudioUtilities.GetSpeakers()
 	interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -74,23 +78,28 @@ def main():
 		data = conn.recv(1024)
 		if not data: break
 
-		data = data.decode('utf-8').strip()
-		if data == '1':
-			print('Playing %s' % track1)
-			playAudio(track1)
-		elif data == '2':
-			print('Playing %s' % track2)
-			playAudio(track2)
-		elif data == '3':
-			print('Looping %s' % track3)
-			playAudio(track3, LOOP)
-		elif data == 'vol':
-			SOME_NUMBER = percentage[0]
-			volume.SetMasterVolumeLevel(SOME_NUMBER, None)
-			print("Master volume set to %sdB" % volume.GetMasterVolumeLevel())
+		packet_id, packet_value = parse_packet(meta, data)
+		if packet_id == 16:
+			if data == '1':
+				print('Playing %s' % track1)
+				playAudio(track1)
+			elif data == '2':
+				print('Playing %s' % track2)
+				playAudio(track2)
+			elif data == '3':
+				print('Looping %s' % track3)
+				playAudio(track3, LOOP)
+			else:
+				stopAudio()
+		elif packet_id == "TODO":
+			volume.SetMasterVolumeLevel(percentage[packet_value], None)
+			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
+		elif packet_id == "TODO2":
+			volume.SetMasterVolumeLevel(packet_value, None)
+			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
 		else:
-			print('Stopping audio')
-			stopAudio()
+			print('Unable to recognize packet id: %s' % packet_id)
+			print('Raw data: %s' % data)
 
 	print('Exiting')
 
