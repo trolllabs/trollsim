@@ -43,9 +43,9 @@ void write_int(char id, int value16) {
 
 int alarmNumber = 0; //variable to hold alarm number
 
-int ledPin1 = 5;  //pin number 1st led
-int ledPin2 = 6;  //pin number 2nd led
-int ledPin3 = 7;  //pin number 3rd led
+int ledPin1 = 3;  //pin number 1st led (PWM)
+int ledPin2 = 5;  //pin number 2nd led (PWM)
+int ledPin3 = 6;  //pin number 3rd led (PWM)
 
 #define enA 10 //enable pin for haptic feedback
 #define in1 11 //in1 pin for haptic feedback
@@ -60,19 +60,19 @@ int pwmOutput = 0;  //variable to hold pwmOutput value to haptic motor
 ********************************************************************/
 
 // Alarm 1 settings:
-int A1OnPeriod = 1000;   //Period in [ms] alarm 1 is activated every loop
-int A1OffPeriod = 2000; // Period in [ms] alarm 1 is off every loop
-int A1Amplitude = 2;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A1OnPeriod = 100;   //Period in [ms] alarm 1 is activated every loop
+int A1OffPeriod = 200; // Period in [ms] alarm 1 is off every loop
+int A1Amplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 2 settings:
-int A2OnPeriod = 2000;   //Period in [ms] alarm 2 is activated every loop
-int A2OffPeriod = 1000;  // Period in [ms] alarm 2 is off every loop
-int A2Amplitude = 3;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A2OnPeriod = 200;   //Period in [ms] alarm 2 is activated every loop
+int A2OffPeriod = 100;  // Period in [ms] alarm 2 is off every loop
+int A2Amplitude = 7;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 3 settings:
-int A3OnPeriod =  1500;  //Period in [ms] alarm 3 is activated every loop
-int A3OffPeriod = 1500;  // Period in [ms] alarm 3 is off every loop
-int A3Amplitude = 4;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A3OnPeriod =  150;  //Period in [ms] alarm 3 is activated every loop
+int A3OffPeriod = 150;  // Period in [ms] alarm 3 is off every loop
+int A3Amplitude = 9;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Audio alarm frequency and amplitude must be tweaked in socketaudio.py
 

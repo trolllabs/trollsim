@@ -39,15 +39,10 @@ void write_int(char id, int value16) {
 
 #include <Wire.h>
 
-
-int bPin1 = 2; //pin number 1st button
 int bPin2 = 3; //pin number 2nd button
-int bPin3 = 4; //pin number 3rd button
-bool bVal1 = LOW; //value read from button 1
 bool bVal2 = LOW; //value read from button 2
-bool bVal3 = LOW; //value read from button 3
-int activePin = 8; //digital pin triggering device on/off.
-int alarmTypePin = 9; //digital pin triggering which alarm system is active
+int activePin = 7; //digital pin triggering device on/off.
+int alarmTypePin = 8; //digital pin triggering which alarm system is active
 int knobValue = 0;
 int scenarioValue = 0;
 
@@ -55,8 +50,8 @@ bool active = 0; //0 or 1, decides if it will trigger alarms or not
 
 int alarms = 1; //value to hold number of alarms that will be triggered in total before device becomes inactive again
 int currentAlarm = 0; //counter counting how many alarms have happened
-unsigned long  minPeriod = 50000; // input in seconds here minimum time period between alarms
-unsigned long  maxPeriod = 70000; // input in seconds here maximum time period between
+unsigned long  minPeriod = 5000; // input in seconds here minimum time period between alarms
+unsigned long  maxPeriod = 7000; // input in seconds here maximum time period between alarms
 
 byte rVal = 0;
 
@@ -93,9 +88,7 @@ void setup() {
   // put your setup code here, to run once:
 
   pinMode(activePin, INPUT);
-  pinMode(bPin1, INPUT);
   pinMode(bPin2, INPUT);
-  pinMode(bPin3, INPUT);
   Serial.begin(115200);
 
   Wire.begin(); //join i2c bus
@@ -120,15 +113,15 @@ void loop() {
   }
   if (alarmType == 0) {
     alarmSystemMod = 0;
-    //Serial.println("System A (light, sound) is active.");
+    Serial.println("System A (light, sound) is active.");
   }
   if (alarmType == 1) {
     alarmSystemMod = 3;
-    //Serial.println("System B (light, sound, haptic) is active.");
+    Serial.println("System B (light, sound, haptic) is active.");
   }
   scenarioValue = scenarioKnob();
   write_int(17, scenarioValue); //Sends if scenario 1, 2 or 3 is active
-  
+
   if (scenarioValue == 1) {
     alarms = scen1Alarms;
     //Serial.println("Scenario 1 active");
@@ -141,7 +134,7 @@ void loop() {
     alarms = scen3Alarms;
     //Serial.println("Scenario 3 active");
   }
-  
+
   while (active == HIGH && currentAlarm < alarms) {      //Condition to execute when device is on/armed.
     ++currentAlarm; //Increments alarm counter by 1
     write_int(13, currentAlarm); //Sends alarm number
@@ -160,15 +153,9 @@ void loop() {
         writeToSlave(rVal + alarmSystemMod);
 
         while (currentTime < limitTime) {
-          bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
-          bVal3 = buttonCheck(bVal3, bPin3);
-          if (bVal1 == HIGH) {
+          if (bVal2 == HIGH) {
             write_int(15, 1); //Sends result of alarm test being passed
-            break;
-          }
-          if (bVal2 == HIGH || bVal3 == HIGH) {
-            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
@@ -179,21 +166,14 @@ void loop() {
         break;
       case 2: //Alarm scenario 2
         write_int(14, rVal); //Sends ID of the triggeder alarm
-        //Serial.println("Alarm 2 triggered");
         startTime = millis();
 
         writeToSlave(rVal + alarmSystemMod);
 
         while (currentTime < limitTime) {
-          bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
-          bVal3 = buttonCheck(bVal3, bPin3);
           if (bVal2 == HIGH) {
             write_int(15, 1); //Sends result of alarm test being passed
-            break;
-          }
-          if (bVal1 == HIGH || bVal3 == HIGH) {
-            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
@@ -210,15 +190,9 @@ void loop() {
         writeToSlave(rVal + alarmSystemMod);
 
         while (currentTime < limitTime) {
-          bVal1 = buttonCheck(bVal1, bPin1);
           bVal2 = buttonCheck(bVal2, bPin2);
-          bVal3 = buttonCheck(bVal3, bPin3);
-          if (bVal3 == HIGH) {
+          if (bVal2 == HIGH) {
             write_int(15, 1); //Sends result of alarm test being passed
-            break;
-          }
-          if (bVal1 == HIGH || bVal2 == HIGH) {
-            write_int(15, 0); //Sends result of alarm test being failed
             break;
           }
           currentTime = millis();
