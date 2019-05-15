@@ -57,7 +57,7 @@ def main():
 	track1 = 'assets/sine.wav'
 	track2 = 'assets/sine.wav'
 	track3 = 'assets/sine.wav'
-	meta = {16: 'i', "TODO": 'i', "TODO2": 'f'}
+	meta = {16: 'i', 18: 'i', 19: 'f'}
 
 	devices = AudioUtilities.GetSpeakers()
 	interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -91,10 +91,10 @@ def main():
 				playAudio(track3, LOOP)
 			else:
 				stopAudio()
-		elif packet_id == "TODO":
+		elif packet_id == 18:
 			volume.SetMasterVolumeLevel(percentage[packet_value], None)
 			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
-		elif packet_id == "TODO2":
+		elif packet_id == 19:
 			volume.SetMasterVolumeLevel(packet_value, None)
 			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
 		else:
