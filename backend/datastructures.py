@@ -145,7 +145,6 @@ class TrollPacket:
 		retval = '%s' % type(self).__name__
 		classvars = vars(self)
 		retval += '\n\thex: %s' % self.hex
-		retval += '\n\tvalue: %s' % self.value
 		for var in classvars.keys():
 			retval += '\n\t%s: %s' % (var, classvars[var])
 		return retval

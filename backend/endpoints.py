@@ -2,7 +2,7 @@ import struct, json, sys, logging
 from threading import Thread
 from protocols import UDPClient, UDPServer, TCPServer, TCPClient, Serial, Bluetooth
 from datastructures import TrollPacket
-from misc import type_lookup, XPlaneDataAdapter
+from misc import type_lookup
 from patterns import Observable
 
 
@@ -12,25 +12,9 @@ class ObservableComponent(Observable, Thread):
 		Thread.__init__(self)
 		self.protocols = extra_protocols
 		self.data_source = data_source
-		self.endpoint_id = -1
-		self.endpoint_name = type(self).__name__
+		self.id = -1
+		self.name = type(self).__name__
 		self.running = True
-
-	@property
-	def name(self):
-		return self.endpoint_name
-
-	@name.setter
-	def name(self, endpoint_name):
-		self.endpoint_name = endpoint_name
-
-	@property
-	def id(self):
-		return self.endpoint_id
-
-	@id.setter
-	def id(self, endpoint_id):
-		self.endpoint_id = endpoint_id
 
 	def parse_data(self):
 		raise NotImplementedError('%s: No parse function implemented!' % self.name)
@@ -63,12 +47,56 @@ class XPlane(ObservableComponent):
 		self.xp_write = UDPClient(config['write'])
 		self.xp_read = UDPServer(config['read'])
 		self.xp_read.add_listener(self.parse_data)
+		self.XP_True = 0x3F800000
+		self.XP_False = 0x00000000
 
 		ObservableComponent.__init__(self, self.xp_read, [self.xp_write])
-		self.adapter = XPlaneDataAdapter()
+
+	def _null_terminate(self, s):
+		return s + '\0'
+
+	def _create_null_pad(self, pad_length):
+		return ('\0'*pad_length).encode()
+
+	def _xplane_boolean(self, arg: bool):
+		'''
+		Convert argument to a format X-Plane accepts as boolean value.
+		'''
+		xp_bool = self.XP_False
+		if arg:
+			xp_bool = self.XP_True
+		return 'i', xp_bool
+
+	def wrap(self, value, name, dtype):
+		'''
+		Builds a dref packet with binary values.
+		'''
+		header = self._null_terminate('DREF')
+		name = self._null_terminate(name)
+		pad_length = 509 - (len(header) + 4 + len(name))
+		pad = self._create_null_pad(pad_length)
+
+		packer = struct.Struct('<%ds %s %ds %ds' % (len(header), dtype, len(name), pad_length))
+		return packer.pack(*(header.encode(), value, name.encode(), pad))
+
+	def parse_to_dref(self, name, value, dtype=None):
+		if type(value) == bool:
+			dtype, value = self._xplane_boolean(value)
+		if not dtype:
+			dtype = type_lookup[type(value)]
+		return self.wrap(value, name, dtype)
+
+	def parse_from_dref(self, packet):
+		'''
+		Currently only supports float datarefs
+		'''
+		name = packet[9:].strip(b'\x00').decode('utf-8')
+		raw_value = packet[5:9]
+		value = struct.unpack('f', raw_value)[0]
+		return name, value
 
 	def write(self, trollpacket):
-		packet = self.adapter.parse_to_dref(trollpacket.name, trollpacket.value)
+		packet = self.parse_to_dref(trollpacket.name, trollpacket.value)
 		self.xp_write.send(packet)
 
 	def external_write(self, name, value):
@@ -82,7 +110,7 @@ class XPlane(ObservableComponent):
 		self.write(packet)
 
 	def parse_data(self, data):
-		name, value = self.adapter.parse_from_dref(data)
+		name, value = self.parse_from_dref(data)
 		packet = TrollPacket.from_name(name, value)
 		self.update_listeners(packet)
 
@@ -122,7 +150,6 @@ class Arduino(ObservableComponent):
 		if len(reading) == 5:
 			try:
 				packet = TrollPacket.from_binary_packet(reading)
-				print(packet)
 				self.update_listeners(packet)
 			except KeyError as e:
 				err_msg = 'Arduino metadata %s. Binary packet: %s' % (e, reading.hex().upper())
