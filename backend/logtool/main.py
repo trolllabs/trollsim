@@ -1,4 +1,4 @@
-import sys, struct
+import sys, struct, json
 from time import sleep
 from tqdm import tqdm
 from bokeh.io import curdoc
@@ -61,42 +61,49 @@ def get_packet_ts(bin_ts):
 	return struct.unpack('>i', bin_ts)[0]
 
 
-sysargs = sys.argv
-metadata = metadata_parser('metadata.txt')
-if len(sysargs) == 2:
-	log = entry_generator(sys.argv[1], 9)
-	channels = {}
-	figures = [[]]
-	print('Loading channels..')
-	for entry in tqdm(log):
-		packet_id = str(entry[0])
-		packet_val = get_packet_val(metadata, packet_id, entry[1:5])
-		packet_ts = get_packet_ts(entry[5:])
-		channel = channels.get(packet_id, None)
-		if not channel:
-			channel = {
-					'name': metadata['ids'][packet_id]['name'],
-					'x': [],
-					'y': []
-					}
-		channels[packet_id] = append_time_val(channel, packet_ts, packet_val)
-	print('Done loading. Generating plots..')
-	row = 0
-	for channel in channels:
-		if len(figures[row]) == 4:
-			figures.append([])
-			row += 1
-		new_fig = figure(width=350, height=350, title='%s:%s' % (channel, channels[channel]['name']))
-		new_fig.line(channels[channel]['x'], channels[channel]['y'])
-		figures[row].append(new_fig)
+def reverse_dict(d):
+	'''
+	Retard function
+	'''
+	return dict(map(reversed, d.items()))
 
-	# For generating html file
-	output_file('%s.html' % sys.argv[1])
-	show(grid(figures))
 
-	# For serving plots from web server
-	#curdoc().add_root(grid(figures))
+path = sys.argv[1]
+metadata = json.load(open(path + '/metadata.json', 'r'))
+modules = reverse_dict(json.load(open(path + '/modules.json', 'r')))
+print(modules)
+log = entry_generator(path + '/log.bin', 10)
+channels = {}
+figures = [[]]
+print('Loading channels..')
+for entry in tqdm(log):
+	packet_id = str(entry[0])
+	packet_val = get_packet_val(metadata, packet_id, entry[1:5])
+	packet_ts = get_packet_ts(entry[5:9])
+	packet_module = str(entry[-1])
+	channel_id = '%s;%s' % (packet_id, packet_module)
+	channel = channels.get(channel_id, None)
+	if not channel:
+		channel = {
+				'name': metadata['ids'][packet_id]['name'],
+				'x': [],
+				'y': []
+				}
+	channels[channel_id] = append_time_val(channel, packet_ts, packet_val)
+print('Done loading. Generating plots..')
+row = 0
+for channel in channels:
+	if len(figures[row]) == 4:
+		figures.append([])
+		row += 1
+	channel_id, channel_origin = channel.split(';')
+	new_fig = figure(width=350, height=350, title='%s:%s, module: %s' % (channel_id, channels[channel]['name'], modules[int(channel_origin)]))
+	new_fig.line(channels[channel]['x'], channels[channel]['y'])
+	figures[row].append(new_fig)
 
-else:
-	print('Missing logpath argument')
+# For generating html file
+output_file('%s.html' % sys.argv[1])
+show(grid(figures))
 
+# For serving plots from web server
+#curdoc().add_root(grid(figures))
