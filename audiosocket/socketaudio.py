@@ -50,8 +50,8 @@ def stopAudio():
 
 def parse_packet(meta, packet):
 	packet_id = packet[0]
-	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
-	return packet_id, packet_value
+	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:-1])
+	return packet_id, packet_value[0]
 
 def main():
 	port = 5050
@@ -81,13 +81,13 @@ def main():
 
 		packet_id, packet_value = parse_packet(meta, data)
 		if packet_id == 16:
-			if data == '1':
+			if data == 1:
 				print('Playing %s' % track1)
 				playAudio(track1)
-			elif data == '2':
+			elif data == 2:
 				print('Playing %s' % track2)
 				playAudio(track2)
-			elif data == '3':
+			elif data == 3:
 				print('Looping %s' % track3)
 				playAudio(track3, LOOP)
 			else:
