@@ -51,6 +51,7 @@ def stopAudio():
 def parse_packet(meta, packet):
 	packet_id = packet[0]
 	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
+	return packet_id, packet_value
 
 def main():
 	port = 5050
