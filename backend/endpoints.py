@@ -205,5 +205,5 @@ class AudioSocket(ObservableComponent):
 		ObservableComponent.__init__(self, self.sender)
 
 	def write(self, packet):
-		self.sender.send(str(packet.value).encode('utf-8'))
+		self.sender.send(packet.binary)
 
