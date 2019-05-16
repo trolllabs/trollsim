@@ -80,7 +80,7 @@ def main():
 		if not data: break
 
 		packet_id, packet_value = parse_packet(meta, data)
-		if packet_id == 16:
+		if packet_id == 17:
 			if data == 1:
 				print('Playing %s' % track1)
 				playAudio(track1)
