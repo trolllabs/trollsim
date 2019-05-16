@@ -50,14 +50,15 @@ def stopAudio():
 
 def parse_packet(meta, packet):
 	packet_id = packet[0]
-	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
+	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:-1])
+	return packet_id, packet_value[0]
 
 def main():
 	port = 5050
 	track1 = 'assets/sine.wav'
 	track2 = 'assets/sine.wav'
 	track3 = 'assets/sine.wav'
-	meta = {16: 'i', "TODO": 'i', "TODO2": 'f'}
+	meta = {16: 'i', 18: 'i', 19: 'f'}
 
 	devices = AudioUtilities.GetSpeakers()
 	interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -80,21 +81,21 @@ def main():
 
 		packet_id, packet_value = parse_packet(meta, data)
 		if packet_id == 16:
-			if data == '1':
+			if data == 1:
 				print('Playing %s' % track1)
 				playAudio(track1)
-			elif data == '2':
+			elif data == 2:
 				print('Playing %s' % track2)
 				playAudio(track2)
-			elif data == '3':
+			elif data == 3:
 				print('Looping %s' % track3)
 				playAudio(track3, LOOP)
 			else:
 				stopAudio()
-		elif packet_id == "TODO":
+		elif packet_id == 18:
 			volume.SetMasterVolumeLevel(percentage[packet_value], None)
 			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
-		elif packet_id == "TODO2":
+		elif packet_id == 19:
 			volume.SetMasterVolumeLevel(packet_value, None)
 			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
 		else:
