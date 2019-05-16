@@ -214,8 +214,11 @@ class Serial(ObservableReading):
 			self.serial_io.write(message)
 
 	def read(self):
-		reading = self.serial_io.readline()
-		self._notify_listeners(reading[:-1]) # remove newline character
+		try:
+			reading = self.serial_io.readline()
+			self._notify_listeners(reading[:-1]) # remove newline character
+		except TypeError as e:
+			logging.exception(e)
 
 	def close(self):
 		self.serial_io.close()
