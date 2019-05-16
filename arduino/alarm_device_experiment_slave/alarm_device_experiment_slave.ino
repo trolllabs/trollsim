@@ -41,19 +41,19 @@ void write_int(char id, int value16) {
 // Alarm 1 settings:
 unsigned long A1OnPeriod = 1000;   //Period in [ms] alarm 1 is activated every loop
 unsigned long A1OffPeriod = 2000; // Period in [ms] alarm 1 is off every loop
-float A1Volume=-2; //Volume of audio alarm 1, in [dB]. Scale from -63,5dB (min) to 0dB (max).
+float A1Volume = -2; //Volume of audio alarm 1, in [dB]. Scale from -63,5dB (min) to 0dB (max).
 int A1HapticAmplitude = 9;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 2 settings:
 unsigned long A2OnPeriod = 2000;   //Period in [ms] alarm 2 is activated every loop
 unsigned long A2OffPeriod = 1000;  // Period in [ms] alarm 2 is off every loop
-float A2Volume=-5.0; //Volume of audio alarm 2, in [dB]. Scale from -63,5dB (min) to 0dB (max).
+float A2Volume = -5.0; //Volume of audio alarm 2, in [dB]. Scale from -63,5dB (min) to 0dB (max).
 int A2HapticAmplitude = 7;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 3 settings:
 unsigned long A3OnPeriod =  1500;  //Period in [ms] alarm 3 is activated every loop
 unsigned long A3OffPeriod = 1500;  // Period in [ms] alarm 3 is off every loop
-float A3Volume=-7; //Volume of audio alarm 3, in [dB]. Scale from -63,5dB (min) to 0dB (max).
+float A3Volume = -7; //Volume of audio alarm 3, in [dB]. Scale from -63,5dB (min) to 0dB (max).
 int A3HapticAmplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Audio alarm frequency and amplitude must be tweaked in socketaudio.py
@@ -77,7 +77,7 @@ int alarm2State = LOW;
 int alarm3State = LOW;
 
 int newMessage = HIGH;
-int soundMessageState=LOW;
+int soundMessageState = LOW;
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
@@ -172,8 +172,8 @@ void loop() {
     case 5: //Alarm scenario 2B
       if ((alarm2State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
-        ledAlarm(alarmNumber-3);
-        soundAlarm(alarmNumber-3);
+        ledAlarm(alarmNumber - 3);
+        soundAlarm(alarmNumber - 3);
         hapticAlarm(alarmNumber - 3);
         alarm2State = HIGH;
         newMessage = LOW;
@@ -190,8 +190,8 @@ void loop() {
     case 6: //Alarm scenario 3B
       if ((alarm3State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
-        ledAlarm(alarmNumber-3);
-        soundAlarm(alarmNumber-3);
+        ledAlarm(alarmNumber - 3);
+        soundAlarm(alarmNumber - 3);
         hapticAlarm(alarmNumber - 3);
         alarm3State = HIGH;
         newMessage = LOW;
@@ -209,10 +209,10 @@ void loop() {
       ledAlarm(0);
       hapticAlarm(0);
 
-      if(soundMessageState==LOW){
+      if (soundMessageState == LOW) {
         soundAlarm(0);
-        soundMessageState=HIGH;
-      }     
+        soundMessageState = HIGH;
+      }
       break;
     default:
       Serial.println("Error in loop-switch input");
@@ -226,7 +226,7 @@ void loop() {
 void receiveEvent(int howMany) {
   alarmNumber = Wire.read();    // receive byte as an integer
   newMessage = HIGH;
-  soundMessageState=LOW;
+  soundMessageState = LOW;
 }
 
 void ledAlarm(int ledAlarmNumber) {
@@ -259,13 +259,13 @@ void soundAlarm(int soundAlarmNumber) {
   write_int(17, soundAlarmNumber); //Sends packet requesting the correct sound alarm
   switch (soundAlarmNumber) {
     case 1: //Alarm scenario 1
-      write_float(19,A1Volume); //Sets alarm volume for alarm to A1Volume
+      write_float(19, A1Volume); //Sets alarm volume for alarm to A1Volume
       break;
     case 2: //Alarm scenario 2
-      write_float(19,A2Volume); //Sets alarm volume for alarm to A2Volume
+      write_float(19, A2Volume); //Sets alarm volume for alarm to A2Volume
       break;
     case 3: //Alarm scenario 3
-      write_float(19,A3Volume); //Sets alarm volume for alarm to A3Volume
+      write_float(19, A3Volume); //Sets alarm volume for alarm to A3Volume
       break;
       break;
 
