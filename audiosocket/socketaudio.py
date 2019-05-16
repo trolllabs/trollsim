@@ -72,37 +72,38 @@ def main():
 	sock.listen()
 	print('TCP listening to %s' % port)
 
-	conn, addr = sock.accept()
-	print('%s:%s connected' % addr)
-
 	while True:
-		data = conn.recv(1024)
-		if not data: break
+		conn, addr = sock.accept()
+		print('%s:%s connected' % addr)
 
-		packet_id, packet_value = parse_packet(meta, data)
-		if packet_id == 17:
-			if data == 1:
-				print('Playing %s' % track1)
-				playAudio(track1)
-			elif data == 2:
-				print('Playing %s' % track2)
-				playAudio(track2)
-			elif data == 3:
-				print('Looping %s' % track3)
-				playAudio(track3, LOOP)
+		while True:
+			data = conn.recv(1024)
+			if not data: break
+
+			packet_id, packet_value = parse_packet(meta, data)
+			if packet_id == 17:
+				if data == 1:
+					print('Playing %s' % track1)
+					playAudio(track1)
+				elif data == 2:
+					print('Playing %s' % track2)
+					playAudio(track2)
+				elif data == 3:
+					print('Looping %s' % track3)
+					playAudio(track3, LOOP)
+				else:
+					stopAudio()
+			elif packet_id == 18:
+				volume.SetMasterVolumeLevel(percentage[packet_value], None)
+				print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
+			elif packet_id == 19:
+				volume.SetMasterVolumeLevel(packet_value, None)
+				print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
 			else:
-				stopAudio()
-		elif packet_id == 18:
-			volume.SetMasterVolumeLevel(percentage[packet_value], None)
-			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
-		elif packet_id == 19:
-			volume.SetMasterVolumeLevel(packet_value, None)
-			print("Master volume: %sdB" % volume.GetMasterVolumeLevel())
-		else:
-			print('Unable to recognize packet id: %s' % packet_id)
-			print('Raw data: %s' % data)
+				print('Unable to recognize packet id: %s' % packet_id)
+				print('Raw data: %s' % data)
 
-	print('Exiting')
+		print('Client disconnected. Listening for new connection.')
 
 if __name__ == '__main__':
 	main()
