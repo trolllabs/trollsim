@@ -50,8 +50,11 @@ def stopAudio():
 
 def parse_packet(meta, packet):
 	packet_id = packet[0]
-	packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
-	return packet_id, packet_value[0]
+	if packet_id in meta:
+		packet_value = struct.unpack('>%s' % meta[packet_id], packet[1:])
+		return packet_id, packet_value[0]
+	else:
+		print('Meta missing ID %s' % packet_id)
 
 def main():
 	port = 5050
