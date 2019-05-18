@@ -86,13 +86,13 @@ def main():
 			print('Packet received: %s, length %s' % (data.hex().upper(), len(data)))
 			packet_id, packet_value = parse_packet(meta, data)
 			if packet_id == 17:
-				if data == 1:
+				if packet_value == 1:
 					print('Playing %s' % track1)
 					playAudio(track1)
-				elif data == 2:
+				elif packet_value == 2:
 					print('Playing %s' % track2)
 					playAudio(track2)
-				elif data == 3:
+				elif packet_value == 3:
 					print('Looping %s' % track3)
 					playAudio(track3, LOOP)
 				else:
