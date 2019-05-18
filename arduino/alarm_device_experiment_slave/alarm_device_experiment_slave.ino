@@ -39,22 +39,22 @@ void write_int(char id, int value16) {
 ********************************************************************/
 
 // Alarm 1 settings:
-unsigned long A1OnPeriod = 1000;   //Period in [ms] alarm 1 is activated every loop
-unsigned long A1OffPeriod = 2000; // Period in [ms] alarm 1 is off every loop
+unsigned long A1OnPeriod = 2999;   //Period in [ms] alarm 1 is activated every loop
+unsigned long A1OffPeriod = 1; // Period in [ms] alarm 1 is off every loop
 float A1Volume = -2; //Volume of audio alarm 1, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A1HapticAmplitude = 9;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A1HapticAmplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 2 settings:
-unsigned long A2OnPeriod = 2000;   //Period in [ms] alarm 2 is activated every loop
-unsigned long A2OffPeriod = 1000;  // Period in [ms] alarm 2 is off every loop
+unsigned long A2OnPeriod = 2110;   //Period in [ms] alarm 2 is activated every loop
+unsigned long A2OffPeriod = 1200;  // Period in [ms] alarm 2 is off every loop
 float A2Volume = -5.0; //Volume of audio alarm 2, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A2HapticAmplitude = 7;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A2HapticAmplitude = 4;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 3 settings:
-unsigned long A3OnPeriod =  1500;  //Period in [ms] alarm 3 is activated every loop
-unsigned long A3OffPeriod = 1500;  // Period in [ms] alarm 3 is off every loop
+unsigned long A3OnPeriod =  810;  //Period in [ms] alarm 3 is activated every loop
+unsigned long A3OffPeriod = 1800;  // Period in [ms] alarm 3 is off every loop
 float A3Volume = -7; //Volume of audio alarm 3, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A3HapticAmplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A3HapticAmplitude = 3;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Audio alarm frequency and amplitude must be tweaked in socketaudio.py
 
@@ -119,15 +119,15 @@ void loop() {
         newMessage = LOW;
       }
       break;
-    case 2: //Alarm scenario 1A
-      if ((alarm2State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
+    case 2: //Alarm scenario 2A
+      if ((alarm2State == LOW && currentMillis - previousMillis >= A2OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
         ledAlarm(alarmNumber);
         soundAlarm(alarmNumber);
         alarm2State = HIGH;
         newMessage = LOW;
       }
-      else if (alarm2State == HIGH && currentMillis - previousMillis >= A1OnPeriod) {
+      else if (alarm2State == HIGH && currentMillis - previousMillis >= A2OnPeriod) {
         previousMillis = currentMillis;
         ledAlarm(0);
         soundAlarm(0);
@@ -136,14 +136,14 @@ void loop() {
       }
       break;
     case 3: //Alarm scenario 1A
-      if ((alarm3State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
+      if ((alarm3State == LOW && currentMillis - previousMillis >= A3OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
         ledAlarm(alarmNumber);
         soundAlarm(alarmNumber);
         alarm3State = HIGH;
         newMessage = LOW;
       }
-      else if (alarm3State == HIGH && currentMillis - previousMillis >= A1OnPeriod) {
+      else if (alarm3State == HIGH && currentMillis - previousMillis >= A3OnPeriod) {
         previousMillis = currentMillis;
         ledAlarm(0);
         soundAlarm(0);
@@ -170,7 +170,7 @@ void loop() {
       }
       break;
     case 5: //Alarm scenario 2B
-      if ((alarm2State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
+      if ((alarm2State == LOW && currentMillis - previousMillis >= A2OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
         ledAlarm(alarmNumber - 3);
         soundAlarm(alarmNumber - 3);
@@ -178,7 +178,7 @@ void loop() {
         alarm2State = HIGH;
         newMessage = LOW;
       }
-      else if (alarm2State == HIGH && currentMillis - previousMillis >= A1OnPeriod) {
+      else if (alarm2State == HIGH && currentMillis - previousMillis >= A2OnPeriod) {
         previousMillis = currentMillis;
         ledAlarm(0);
         soundAlarm(0);
@@ -188,7 +188,7 @@ void loop() {
       }
       break;
     case 6: //Alarm scenario 3B
-      if ((alarm3State == LOW && currentMillis - previousMillis >= A1OffPeriod) || newMessage == HIGH) {
+      if ((alarm3State == LOW && currentMillis - previousMillis >= A3OffPeriod) || newMessage == HIGH) {
         previousMillis = currentMillis;
         ledAlarm(alarmNumber - 3);
         soundAlarm(alarmNumber - 3);
@@ -196,7 +196,7 @@ void loop() {
         alarm3State = HIGH;
         newMessage = LOW;
       }
-      else if (alarm3State == HIGH && currentMillis - previousMillis >= A1OnPeriod) {
+      else if (alarm3State == HIGH && currentMillis - previousMillis >= A3OnPeriod) {
         previousMillis = currentMillis;
         ledAlarm(0);
         soundAlarm(0);
@@ -217,7 +217,7 @@ void loop() {
     default:
       Serial.println("Error in loop-switch input");
   }
-  delay(100);
+  delay(10);
   currentMillis = millis(); //update timer
 }
 
