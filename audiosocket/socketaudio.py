@@ -58,10 +58,10 @@ def parse_packet(meta, packet):
 
 def main():
 	port = 5050
-	track1 = 'assets/sine.wav'
-	track2 = 'assets/sine.wav'
-	track3 = 'assets/sine.wav'
-	meta = {16: 'i', 18: 'i', 19: 'f'}
+	track1 = 'assets/red.wav'
+	track2 = 'assets/yellow.wav'
+	track3 = 'assets/green.wav'
+	meta = {17: 'i', 18: 'i', 19: 'f'}
 
 	devices = AudioUtilities.GetSpeakers()
 	interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
