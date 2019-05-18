@@ -80,7 +80,7 @@ def main():
 		print('%s:%s connected' % addr)
 
 		while True:
-			data = conn.recv(1024)
+			data = conn.recv(5)
 			if not data: break
 
 			print('Packet received: %s, length %s' % (data.hex().upper(), len(data)))
