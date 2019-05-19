@@ -1,11 +1,53 @@
+const int packet_size = 6;
+typedef union {
+  float floatingPoint;
+  byte binary[4];
+} binaryFloat;
+void write_float(char id, float value) {
+  binaryFloat reading;
+  reading.floatingPoint = value;
+
+  byte res[packet_size];
+  res[0] = id;
+  res[1] = reading.binary[3];
+  res[2] = reading.binary[2];
+  res[3] = reading.binary[1];
+  res[4] = reading.binary[0];
+  res[5] = '\n';
+
+  Serial.write(res, packet_size);
+}
+void write_long(char id, long value32) {
+  byte res[packet_size];
+  res[0] = id;
+  res[1] = (value32 >> 24) & 0xFF;
+  res[2] = (value32 >> 16) & 0xFF;
+  res[3] = (value32 >> 8)  & 0xFF;
+  res[4] = value32 & 0xFF;
+  res[5] = '\n';
+
+  Serial.write(res, packet_size);
+}
+void write_int(char id, int value16) {
+  long value32 = (long) value16;
+  write_long(id, value32);
+}
+
+
 int bPin1 = 3;
 int bPin2 = 5;
 int bPin3 = 7;
+int bPin4 = 9;
 
 
 bool bVal1 = LOW; //value read from button 1
 bool bVal2 = LOW; //value read from button 2
 bool bVal3 = LOW; //value read from button 3
+bool bVal4 = LOW; //value read from button 4
+
+unsigned long currentTime = 0;
+unsigned long timeOfPrint = 0;
+unsigned long timeSincePrint = 0;
 
 
 bool buttonCheck(bool bValX, int buttonPinX) {
@@ -26,23 +68,34 @@ void setup() {
   pinMode(bPin1, INPUT);
   pinMode(bPin2, INPUT);
   pinMode(bPin3, INPUT);
+  pinMode(bPin4, INPUT);
 
   Serial.begin(115200);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  currentTime = millis();
+  timeSincePrint = currentTime - timeOfPrint;
   bVal1 = buttonCheck(bVal1, bPin1);
-  if (bVal1 == HIGH) {
-    Serial.println("Button 1 pushed");
+  if (bVal1 == HIGH && timeSincePrint > 500) {
+    write_int(20, 1);
+    timeOfPrint = millis();
   }
   bVal2 = buttonCheck(bVal2, bPin2);
-  if (bVal2 == HIGH) {
-    Serial.println("Button 2 pushed");
+  if (bVal2 == HIGH && timeSincePrint > 500) {
+    write_int(20, 2);
+    timeOfPrint = millis();
   }
   bVal3 = buttonCheck(bVal3, bPin3);
-  if (bVal3 == HIGH) {
-    Serial.println("Button 3 pushed");
+  if (bVal3 == HIGH && timeSincePrint > 500) {
+    write_int(20, 3);
+    timeOfPrint = millis();
   }
-  delay(100);
-}
+  bVal4 = buttonCheck(bVal4, bPin4);
+  if (bVal4 == HIGH && timeSincePrint > 500) {
+    write_int(20, 0);
+    timeOfPrint = millis();
+  }
+    delay(10);
+  }
