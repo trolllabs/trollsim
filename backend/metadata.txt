@@ -4,6 +4,7 @@
 3;sim/joystick/yoke_pitch_ratio;float
 4;sim/joystick/yoke_heading_ratio;float
 5;sim/test/test_float;float
+6;sim/cockpit2/fuel;float
 11;Alarm armed;int
 12;Alarm type;int
 13;Alarm scenario;int
@@ -13,6 +14,7 @@
 17;Slave audio alarm;int
 18;Slave audio volume percent;int
 19;Slave audio volume db;float
+20;Audio Control Panel;int
 50;frontend begin;NULL
 51;Throttle slider;float
 52;Roll slider;float
@@ -30,9 +32,9 @@
 215;ECG Vx-RL CAL (mVolts);float
 216;Heart Rate ECG LL-RA (Beats/min);float
 220;SlideshowStart;uint32;local timestamp
-221;SlideshowStop;uint32;local timestamp
+221;SlideshowEnd;uint32;local timestamp
 222;SlideStart;uint32;local timestamp
-223;SlideStop;uint32;local timestamp
+223;SlideEnd;uint32;local timestamp
 224;GazeCalibrationStart;uint32;local timestamp
 225;GazeCalibrationEnd;uint32;local timestamp
 226;ExposureStatistics;None
