@@ -37,7 +37,7 @@ void write_int(char id, int value16) {
 /*******************************************************************
   Variables for the experimenter to tweak alarm periods and haptic amplitude.
 ********************************************************************/
-unsigned long  minPeriod = 50000; // input in milliseconds here minimum time period between alarms
+unsigned long  minPeriod = 60000; // input in milliseconds here minimum time period between alarms
 unsigned long  maxPeriod = 70000; // input in milliseconds here maximum time period between alarms
 unsigned long alarmPeriod = 10000; //var in milliseconds that decides time alarm sounds before it fails and stops. Max 16 bits (65535 because of wire.transmit constraints)
 
@@ -73,7 +73,7 @@ unsigned long limitTime = 0; //Variable to hold time limit where alarm task is f
 
 int alarmType = 0; //Var to hold which alarm system is active (0 for system A (light, sound, 1 for system B (light, sound, haptic)
 int alarmSystemMod = 0; //Variable adjusting rVal in line with what system is active
-int disarmedMessageState=LOW;
+int disarmedMessageState = LOW;
 
 //*******************************************************************
 void alarmTypeCheck() {
@@ -144,7 +144,7 @@ void loop() {
 
   if (active == HIGH && currentAlarm < alarms) {
     write_int(11, 1); //Sends alarm=armed
-    disarmedMessageState=LOW; //Resets state variable allowing device to report when disarmed
+    disarmedMessageState = LOW; //Resets state variable allowing device to report when disarmed
     alarmTypeCheck(); //Checks which alarm system is selected, sets alarmSystemMod-variable and sends packet informing of system A or B
     scenarioCheck(); //Checks position of scenario switch, sets correct nuber of alarms and sends packet informing of scenario 1, 2 or 3
   }
@@ -154,31 +154,38 @@ void loop() {
     randomPeriod = random(minPeriod, maxPeriod); //randomized waiting time untill first alarm is triggered
     limitTime = currentTime + randomPeriod + alarmPeriod; //time where alarm task is failed due to no action
     delay(randomPeriod);
-    rVal = random(1, 4);
-    write_int(15, rVal); //Sends ID of the triggeder alarm
-    //write_int(14, currentAlarm); //Sends alarm number
-    startTime = millis();
-    writeToSlave(rVal + alarmSystemMod);
-    while (currentTime < limitTime) {
+    active = digitalRead(activePin);
+    if (active == HIGH) {
+      rVal = random(1, 4);
+      write_int(15, rVal); //Sends ID of the triggeder alarm
+      //write_int(14, currentAlarm); //Sends alarm number
+      startTime = millis();
+      writeToSlave(rVal + alarmSystemMod);
+    }
+    while (currentTime < limitTime && active == HIGH) {
       bVal = buttonCheck(bVal, bPin);
+      currentTime = millis();
+      active = digitalRead(activePin);
       if (bVal == HIGH) {
         write_int(16, 1); //Send packet reporting button was pushed.
         writeToSlave(0); //Send signal to slave stopping alarms.
         break;
       }
-      currentTime = millis();
-      if (currentTime >= limitTime) {
+      else if (currentTime >= limitTime && bVal == LOW) {
         write_int(15, 2); //Sends result of alarm test being failed due to inactivity
+        writeToSlave(0);
+      }
+      if (active == LOW) {
         writeToSlave(0);
       }
     }
     active = digitalRead(activePin); //Checks if device is still active and should continue looping
   }
-  if(disarmedMessageState==LOW){
+  if (disarmedMessageState == LOW) {
     write_int(11, 0); //Sends packet informing that alarm device is disarmed.
-    disarmedMessageState=HIGH;
+    disarmedMessageState = HIGH;
   }
-  delay(1000);
+  delay(300);
   if (active == LOW) {
     currentAlarm = 0;
   }
