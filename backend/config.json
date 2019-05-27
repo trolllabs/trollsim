@@ -21,6 +21,11 @@
 		"port": 5060,
 		"buffer-size": 1024
 	},
+	"control-socket": {
+		"ip": "127.0.0.1",
+		"port": 5065,
+		"buffer-size": 1024
+	},
 	"shimmer-gsr": {
 		"name": "Shimmer3-C6F2",
 		"MAC": "00:06:66:D7:C6:F2",
@@ -59,6 +64,11 @@
 	"alarmbox-slave": {
 		"name": "Slave Box",
 		"sn": "7533832353535140E1C2",
+		"baudrate": 115200
+	},
+	"audio-control": {
+		"name": "Audio Control Panel",
+		"sn": "85438303233351418191",
 		"baudrate": 115200
 	}
 }

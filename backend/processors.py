@@ -39,6 +39,21 @@ class AudioTrigger(Processor):
 		self.route_data(alarmbox, self.send_signal)
 
 
+class ControlTrigger(Processor):
+	def __init__(self):
+		Processor.__init__(self)
+		self.endpoints = ['control-socket', 'audio-control']
+
+	def send_signal(self, packet):
+		if packet.id in [20]:
+			self.controlsocket.write(packet)
+
+	def set_sources(self, endpoints: dict):
+		self.controlsocket = endpoints['control-socket']
+		audiocontrol = endpoints['audio-control']
+		self.route_data(audiocontrol, self.send_signal)
+
+
 class GloveMultiplier(Processor):
 	'''
 	Takes a datastream from the glove arduino and multiplies it with
