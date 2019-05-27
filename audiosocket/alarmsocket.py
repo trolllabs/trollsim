@@ -58,9 +58,9 @@ def parse_packet(meta, packet):
 
 def main():
 	port = 5050
-	track1 = 'assets/red.wav'
-	track2 = 'assets/yellow.wav'
-	track3 = 'assets/green.wav'
+	track1 = 'assets/alarms/red.wav'
+	track2 = 'assets/alarms/yellow.wav'
+	track3 = 'assets/alarms/green.wav'
 	meta = {17: 'i', 18: 'i', 19: 'f'}
 
 	devices = AudioUtilities.GetSpeakers()
