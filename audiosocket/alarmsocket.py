@@ -57,7 +57,7 @@ def parse_packet(meta, packet):
 		print('Meta missing ID %s' % packet_id)
 
 def main():
-	port = 5050
+	port = 5060
 	track1 = 'assets/alarms/red.wav'
 	track2 = 'assets/alarms/yellow.wav'
 	track3 = 'assets/alarms/green.wav'
