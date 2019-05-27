@@ -199,7 +199,7 @@ class iMotions(ObservableComponent):
 			raise KeyError('Unknown iMotions packet: %s. Full packet: %s' % (data[1], data))
 
 
-class AudioSocket(ObservableComponent):
+class TCPSocket(ObservableComponent):
 	def __init__(self, config):
 		self.sender = TCPClient(config)
 		ObservableComponent.__init__(self, self.sender)
