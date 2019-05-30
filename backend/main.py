@@ -63,5 +63,9 @@ if __name__ == "__main__":
 	error_logger.addHandler(fileHandler)
 
 	sys.excepthook = unhandled_exception_callback
-	main()
+
+	try:
+		main()
+	except KeyboardInterrupt:
+		print('Goodbye')
 
