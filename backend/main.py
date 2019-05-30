@@ -1,4 +1,3 @@
-import sys, logging
 from control import ControlAPI
 from misc import metadata_parser, ArgparseHelper, load_configs
 from patterns import ModuleFactory
@@ -48,6 +47,8 @@ def main():
 
 
 if __name__ == "__main__":
+	import sys, logging
+	from misc import unhandled_exception_callback
 	log_format = '%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s'
 	log_formatter = logging.Formatter(log_format)
 
@@ -61,5 +62,6 @@ if __name__ == "__main__":
 	error_logger.addHandler(consoleHandler)
 	error_logger.addHandler(fileHandler)
 
+	sys.excepthook = unhandled_exception_callback
 	main()
 

@@ -15,6 +15,13 @@ class ArgparseHelper(argparse.ArgumentParser):
 		sys.exit(2)
 
 
+def unhandled_exception_callback(e_type, e_value, e_traceback):
+	if issubclass(e_type, KeyboardInterrupt):
+		sys.__excepthook__(e_type, e_value, e_traceback)
+	else:
+		logging.exception('Uncaught exception', exc_info=(e_type, e_value, e_traceback))
+
+
 def load_configs(args):
 	with open(args.file, 'r') as f:
 		component_config = json.load(f)
