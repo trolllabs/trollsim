@@ -8,7 +8,7 @@ from http.server import HTTPServer
 
 
 parser = ArgparseHelper()
-parser.add_argument('-f','--file', type=str, default='config.json',
+parser.add_argument('-c','--config', type=str, default='config.json',
 		help='Set the path of config file. Default is config.json in working directory.')
 parser.add_argument('-m','--meta', type=str, default='metadata.txt',
 		help='Set the path of metadata file. Default is metadata.txt in working directory.')

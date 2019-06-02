@@ -23,7 +23,7 @@ def unhandled_exception_callback(e_type, e_value, e_traceback):
 
 
 def load_configs(args):
-	with open(args.file, 'r') as f:
+	with open(args.config, 'r') as f:
 		component_config = json.load(f)
 	with open(args.meta, 'r') as f:
 		metadata_config = metadata_parser(f)
