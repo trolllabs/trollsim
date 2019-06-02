@@ -132,11 +132,11 @@ class WebUI(ObservableComponent):
 		self.frontend.send(packet)
 
 	def parse_data(self, data):
-		if 'metadata' in data.decode('utf-8'):
+		if len(data) == len('meta') and 'meta' in data.decode('utf-8'):
 			print('WebUI: Metadata requested')
 			self.frontend.send(json.dumps(TrollPacket.meta).encode('utf-8'))
 		else:
-			packet = TrollPacket(data)
+			packet = TrollPacket.from_binary_packet(data)
 			self.update_listeners(packet)
 
 

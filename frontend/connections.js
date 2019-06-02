@@ -6,6 +6,7 @@ const WebSocket = require('ws');
 const tcp_client = require('./tcp_client')
 var metadata;
 var wss;
+var socket_client;
 function initConnections(http) {
 	wss = new WebSocket.Server({ server: http });
 	wss.on('connection', wssConnectionHandler);
@@ -15,10 +16,10 @@ function initConnections(http) {
 
 
 	tcp_client.setHandler(getSocketData);
-	var socket_client = tcp_client.connect('localhost', 8005);
+	socket_client = tcp_client.connect('localhost', 8005);
 	socket_client.on('connect', function () {
 		if (!metadata)
-			socket_client.write('metadata');
+			socket_client.write('meta');
 	});
 }
 

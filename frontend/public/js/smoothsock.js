@@ -5,13 +5,13 @@ var yaw = new TimeSeries();
 
 sock.addEventListener('message', function (e) {
 	packet = e.data.split(' '); // First element is ID
-	if (packet[0] == 1)
+	if (packet[0] == 120)
 		flex.append(new Date().getTime(), packet[1]);
-	else if (packet[0] == 2)
+	else if (packet[0] == 121)
 		roll.append(new Date().getTime(), packet[1]);
-	else if (packet[0] == 3)
+	else if (packet[0] == 122)
 		pitch.append(new Date().getTime(), packet[1]);
-	else if (packet[0] == 4)
+	else if (packet[0] == 123)
 		yaw.append(new Date().getTime(), packet[1]);
 });
 

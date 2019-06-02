@@ -14,7 +14,7 @@
 	"frontend": {
 		"ip": "0.0.0.0",
 		"port": 8005,
-		"buffer-size": 1024
+		"buffer-size": 5
 	},
 	"audiosocket": {
 		"ip": "127.0.0.1",
