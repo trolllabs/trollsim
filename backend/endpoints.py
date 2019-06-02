@@ -22,6 +22,11 @@ class ObservableComponent(Observable, Thread):
 	def write(self):
 		raise NotImplementedError('%s: No write function implemented!' % self.name)
 
+	def test_write(self, packet_id, value):
+		packet = struct.pack('>B %s' % type_lookup[type(value)], data_id, value)
+		print('%s Testpacket: 0x%s' % (self.name, packet.hex().upper()))
+		self.data_source.send(packet)
+
 	def update_listeners(self, packet):
 		packet.module_id = self.id
 		self._notify_listeners(packet)
@@ -99,16 +104,6 @@ class XPlane(ObservableComponent):
 		packet = self.parse_to_dref(trollpacket.name, trollpacket.value)
 		self.xp_write.send(packet)
 
-	def external_write(self, name, value):
-		'''
-		Creates a TrollPacket from scratch instead of reading straight from one.
-		The data should be created through another endpoint, which is why trollpacket
-		should be the only accepted write argument.
-		Intended for debugging purposes.
-		'''
-		packet = TrollPacket.from_name(name, value)
-		self.write(packet)
-
 	def parse_data(self, data):
 		name, value = self.parse_from_dref(data)
 		packet = TrollPacket.from_name(name, value)
@@ -125,11 +120,6 @@ class WebUI(ObservableComponent):
 	def write(self, trollpacket):
 		if self.frontend.ready:
 			self.frontend.send(trollpacket.binary)
-
-	def external_write(self, data_id, value):
-		packet = struct.pack('>B i', data_id, value)
-		print('0x' + packet.hex().upper())
-		self.frontend.send(packet)
 
 	def parse_data(self, data):
 		if len(data) == len('meta') and 'meta' in data.decode('utf-8'):
