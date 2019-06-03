@@ -60,7 +60,7 @@ def load_trollsim_log(logdir_path):
 			'Value': [],
 			'Origin ID': [],
 			'Packet ID': [],
-			'Channel name': []
+			'Channel': []
 			}
 
 	with open(logdir_path + '/metadata.json', 'r') as f:
@@ -81,18 +81,12 @@ def load_trollsim_log(logdir_path):
 	for entry in tqdm(log_entries, total=num_entries):
 		packet_id = str(entry[0])
 
-		#if packet_id == '211':
 		logdict['Packet ID'].append(entry[0])
 		logdict['Timestamp'].append(struct.unpack('>i', entry[5:9])[0])
 		logdict['Origin ID'].append(entry[-1])
 		logdict['Origin'].append(modules[entry[-1]])
 		logdict['Value'].append(get_packet_val(metadata, packet_id, entry[1:5]))
 		logdict['Name'].append(metadata['ids'][packet_id]['name'])
-		logdict['Channel name'].append(logdict['Origin'][-1] + ':' + logdict['Name'][-1])
+		logdict['Channel'].append(logdict['Origin'][-1] + ':' + logdict['Name'][-1])
 
 	return DataFrame(logdict)
-	#start_ts = int(logdir_path.split('log')[-1])
-	#logdata = DataFrame(logdict)
-	#logdata['Timestamp'] = np.array(logdata['Timestamp'] + start_ts*1000).view('datetime64[ms]').tolist()
-	#return logdata
-

@@ -20,7 +20,7 @@ class MixedData:
 		# For plotting lines separately
 		#self.views = []
 
-		self.id_list = list(set(self.logdata['Channel name']))
+		self.id_list = list(set(self.logdata['Channel']))
 		self.id_list.sort()
 		self.channel_checkbox = CheckboxGroup(labels=self.id_list)
 		self.channel_checkbox.on_change('active', self.lineplot_handler)
@@ -28,12 +28,12 @@ class MixedData:
 		#self.scatter_channel_checkbox.on_change('active', self.update_
 
 	def generate_dataset(self, log_data, active_channels):
-		visible_data = DataFrame(columns=['Timestamp', 'Value', 'name', 'color'])
+		visible_data = DataFrame(columns=['Timestamp', 'Value', 'channel', 'color'])
 
 		for i, channel in enumerate(active_channels):
-			channel = log_data[log_data['Channel name'] == channel]
-			channel.color = Category20_16[i]
-			visible_data = visible_data.append(channel, sort=True)
+			visible_channel = log_data[log_data['Channel'] == channel]
+			visible_channel.color = Category20_16[i]
+			visible_data = visible_data.append(visible_channel, sort=True)
 
 		return ColumnDataSource(visible_data)
 
