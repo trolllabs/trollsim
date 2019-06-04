@@ -82,7 +82,7 @@ def load_trollsim_log(logdir_path):
 		packet_id = str(entry[0])
 
 		logdict['Packet ID'].append(entry[0])
-		logdict['Timestamp'].append(struct.unpack('>i', entry[5:9])[0])
+		logdict['Timestamp'].append(struct.unpack('>I', entry[5:9])[0])
 		logdict['Origin ID'].append(entry[-1])
 		logdict['Origin'].append(modules[entry[-1]])
 		logdict['Value'].append(get_packet_val(metadata, packet_id, entry[1:5]))
