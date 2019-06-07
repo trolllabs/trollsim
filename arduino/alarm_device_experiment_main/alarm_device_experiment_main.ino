@@ -37,8 +37,8 @@ void write_int(char id, int value16) {
 /*******************************************************************
   Variables for the experimenter to tweak alarm periods and haptic amplitude.
 ********************************************************************/
-unsigned long  minPeriod = 60000; // input in milliseconds here minimum time period between alarms
-unsigned long  maxPeriod = 70000; // input in milliseconds here maximum time period between alarms
+unsigned long  minPeriod = 6000; // input in milliseconds here minimum time period between alarms
+unsigned long  maxPeriod = 7000; // input in milliseconds here maximum time period between alarms
 unsigned long alarmPeriod = 10000; //var in milliseconds that decides time alarm sounds before it fails and stops. Max 16 bits (65535 because of wire.transmit constraints)
 
 int scen1Alarms = 2; //value deciding number of alarms in scenario 1
@@ -78,6 +78,7 @@ int disarmedMessageState = LOW;
 //*******************************************************************
 void alarmTypeCheck() {
   alarmType = digitalRead(alarmTypePin); //Real value of alarmTypePin, deciding which system should be used.
+  
   if (alarmType == 0) {
     alarmSystemMod = 0;
     write_int(12, 0); //Sends alarm type A
