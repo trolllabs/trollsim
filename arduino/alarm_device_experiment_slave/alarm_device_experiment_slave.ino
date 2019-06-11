@@ -42,19 +42,19 @@ void write_int(char id, int value16) {
 unsigned long A1OnPeriod = 2999;   //Period in [ms] alarm 1 is activated every loop
 unsigned long A1OffPeriod = 1; // Period in [ms] alarm 1 is off every loop
 float A1Volume = -2; //Volume of audio alarm 1, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A1HapticAmplitude = 9;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A1HapticAmplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 2 settings:
 unsigned long A2OnPeriod = 2110;   //Period in [ms] alarm 2 is activated every loop
 unsigned long A2OffPeriod = 1200;  // Period in [ms] alarm 2 is off every loop
 float A2Volume = -5.0; //Volume of audio alarm 2, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A2HapticAmplitude = 7;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A2HapticAmplitude = 4;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Alarm 3 settings:
 unsigned long A3OnPeriod =  810;  //Period in [ms] alarm 3 is activated every loop
 unsigned long A3OffPeriod = 1800;  // Period in [ms] alarm 3 is off every loop
 float A3Volume = -7; //Volume of audio alarm 3, in [dB]. Scale from -63,5dB (min) to 0dB (max).
-int A3HapticAmplitude = 5;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
+int A3HapticAmplitude = 3;  //Amplitude in [V] of alarm 1's haptic feedback. Input valid from 0-9V.
 
 // Audio alarm frequency and amplitude must be tweaked in socketaudio.py
 
@@ -287,6 +287,6 @@ void hapticAlarm(int hapticAlarmNumber) {
       voltageValue = 0; // Set voltage to 0V
       break;
   }
-  pwmOutput = map(voltageValue, 0, 10, 0 , 255); // Map the voltage value from 0 to 255
+  pwmOutput = map(voltageValue, 0,5, 0 , 255); // Map the voltage value from 0 to 255
   analogWrite(enA, pwmOutput); // Send PWM signal to L298N Enable pin
 }
