@@ -1,3 +1,10 @@
+"""
+.. module:: control
+
+TrollSim control module. TrollSim modules and processors are started and closed
+upon HTTP requests through ControlAPI from this module.
+"""
+
 import logging
 from misc import DataWriter
 from processors import Tunnel
@@ -6,6 +13,9 @@ from http.server import BaseHTTPRequestHandler
 
 
 class AbstractedHTTPHandler(BaseHTTPRequestHandler):
+	"""
+	Parent class just for hiding boilerplate code
+	"""
 	def __call__(self, *args):
 		BaseHTTPRequestHandler.__init__(self, *args)
 
@@ -19,6 +29,39 @@ class AbstractedHTTPHandler(BaseHTTPRequestHandler):
 
 
 class ControlAPI(AbstractedHTTPHandler):
+	"""
+	A simple web server which (as far as I have found out) only
+	supports GET requests.
+
+	Starts and stop modules/processors based on the path in a GET
+	request.
+
+	Supported paths are:
+	- /start/<modules/processors/all>
+	- /stop/<modules/processors/all>
+	- /tunnel/<module1>/<module2>
+	- /status
+
+	'start' starts whatever module or processor that is mentioned in
+	the next segments. Yes, plural.
+	ie. '/start/glove/xplane/potato' is fully valid if next three
+	segments (glove, xplane, potato) are existing modules/processors.
+
+	'stop' stops modules and processors, but is syntax-wise similar
+	to 'start' when it comes to the next segments.
+
+	<modules/processors/all> means that either a module or processor
+	name as a segment or the "all" keyword are allowed. If all is
+	inputed, it starts all processors and modules. Only '/start/all'
+	or '/stop/all' is needed.
+
+	'tunnel' uses the protocols.Tunnel class to pipe data directly.
+	Example: '/tunnel/glove/xplane' tunnels data from glove directly
+	to xplane.
+
+	'status' responds a request with a formatted string on which modules
+	and processors are running, along with the logging state.
+	"""
 	def __init__(self, modules):
 		self.module_creator = modules
 		self.logger = None
@@ -110,6 +153,8 @@ class ControlAPI(AbstractedHTTPHandler):
 	def start_processor(self, processor_name):
 		if processor_name not in self.running_processors:
 			if processor_name in self.processors:
+				# TODO: fix this stupid proc.endpoints logic
+				# (also on other side, proc constructor and set_source)
 				for module in self.processors[processor_name].endpoints:
 					self.start_module(module)
 				self.processors[processor_name].set_sources(self.running_modules)

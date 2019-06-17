@@ -1,30 +1,63 @@
-''' Data processors
+"""
+.. module:: processors
 
 A collection of hubs where data pass through, gets possibly mutated
 and sent further.
-'''
 
+All processor constructors must have a list with the names of modules
+they need until a better logic is implemented. See implementation of
+control.ControlAPI.start_processor.
+"""
 
 class Tunnel:
+	"""
+	A simple tunnel which output subscribes to input source where data
+	is not processed.
+	"""
 	def __init__(self, input_source, output_source):
 		input_source.add_listener(output_source.write)
 
 
 class Processor:
+	"""
+	Parent class for all processors.
+
+	Has a *subscribe* method for data routing, route_data and close
+	method for properly closing all parties involved in data routing.
+	(So use it!)
+	"""
 	def __init__(self):
 		self.data_sources = {}
 
 	def route_data(self, source, callback):
+		"""
+		Adds a source (endpoint) to data_sources for later availability
+		when closing a processor in end_session.
+
+		:param source: A data source/endpoint.
+		:param callback: A subscriber to the source argument.
+
+		:type source: ObservableComponent
+		:type callback: function
+		"""
 		source.add_listener(callback)
 		self.data_sources[source] = callback
 
 	def end_session(self):
+		"""
+		Ends a processor session by removing subscribers from
+		subscription list.
+		"""
 		for source in self.data_sources:
 			source.remove_listener(self.data_sources[source])
 		self.data_sources = {}
 
 
 class AudioTrigger(Processor):
+	"""
+	Routes data with IDs 17, 18 and 19 from alarmbox-slave to
+	audiosocket module.
+	"""
 	def __init__(self):
 		Processor.__init__(self)
 		self.endpoints = ['audiosocket', 'alarmbox-slave']
@@ -40,6 +73,9 @@ class AudioTrigger(Processor):
 
 
 class ControlTrigger(Processor):
+	"""
+	Routes data with ID 20 from audio-control to control-socket module.
+	"""
 	def __init__(self):
 		Processor.__init__(self)
 		self.endpoints = ['control-socket', 'audio-control']
@@ -57,15 +93,15 @@ class ControlTrigger(Processor):
 class GloveMultiplier(Processor):
 	'''
 	Takes a datastream from the glove arduino and multiplies it with
-	self.data_multipliers. data_multipliers can be changed through
-	frontend_handler, which in turn is set from the frontend.
+	a number from self.multipliers and then sends to frontend/xplane
 
-	                    frontend (agent)
-	                           |
-	                           v
-	[glove_arduino] -> [GloveMultiplier] -> [data output]
+	glove -> *self.multipliers -> xplane
+	glove -> *self.multipliers -> frontend
 
-	[glove_arduino] -> [frontend]
+	Frontend implementation has sliders which updates data through
+	GloveMultiplier.update_multipliers.
+
+	frontend -> set self.multipliers
 	'''
 	def __init__(self):
 		Processor.__init__(self)

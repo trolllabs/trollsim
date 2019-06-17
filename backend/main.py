@@ -30,6 +30,7 @@ def main():
 	modules = ModuleFactory(config)
 	TrollPacket.meta = meta
 
+	# Add modules/processors to module manager
 	modules.new_module('xplane', XPlane)
 	modules.new_module('frontend', WebUI)
 	modules.new_module('glove', Arduino)
@@ -47,6 +48,9 @@ def main():
 
 
 if __name__ == "__main__":
+	"""
+	Logs and prints all exceptions.
+	"""
 	import sys, logging
 	from misc import unhandled_exception_callback
 	log_format = '%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s'

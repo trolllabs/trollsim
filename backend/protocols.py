@@ -1,3 +1,10 @@
+"""
+.. module:: protocols
+
+The protocol classes are the lowest abstraction layer. These are just
+a generalized implementation of already existing protocol
+implementation.
+"""
 import socket, sys, serial, threading, struct, bluetooth, select, logging
 from serial.tools import list_ports
 from datastructures import TrollPacket
@@ -5,21 +12,15 @@ from patterns import Observable
 from time import sleep
 
 
-''' Endpoints
-
-This module contains all the endpoint logic. Most classes here should
-have standardized read and send methods, unless they are intended for
-only one way communication.
-
-The read method is intended to be a private method as all external read
-calls should go through observer subscription pattern.
-'''
-
-
 class ObservableReading(Observable):
-	'''
-	Force method implementation for children classes
-	'''
+	"""
+	Parent class for all protocol implementations.
+
+	All children classes should implement connect, send, read and close
+	methods.
+
+	TODO: Use ABC to enforce implementation of said mandatory methods.
+	"""
 	def __init__(self):
 		self.ready = False
 		Observable.__init__(self)
@@ -38,14 +39,14 @@ class ObservableReading(Observable):
 
 
 class UDPClient(ObservableReading):
-	'''
-	Args:
-		config (dict): Has the keywords "id", "ip" and "port" to
-			establish a connection to socket server.
-			The "id" keyword is the packet identifier for where a
-			reading originates from.
-	'''
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "ip" and "port" to establish a
+		connection to socket server. "buffer-size" keyword for
+		defining packet size.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 		self.address = (self.config['ip'], self.config['port'])
@@ -68,14 +69,17 @@ class UDPClient(ObservableReading):
 
 
 class UDPServer(ObservableReading):
-	'''
-	Args:
-		config (dict): Has the keywords "id", "ip" and "port" to
-			establish a socket server.
-			The "id" keyword is the packet identifier for where a
-			reading originates from.
-	'''
+	"""
+	TODO: Missing send method.
+	"""
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "ip" and "port" to establish a
+		connection to socket server. "buffer-size" keyword for
+		defining packet size.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 		self.address = (self.config['ip'], self.config['port'])
@@ -98,6 +102,13 @@ class UDPServer(ObservableReading):
 
 class TCPClient(ObservableReading):
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "ip" and "port" to establish a
+		connection to socket server. "buffer-size" keyword for
+		defining packet size.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 		self.address = (config['ip'], config['port'])
@@ -128,16 +139,17 @@ class TCPClient(ObservableReading):
 
 
 class TCPServer(ObservableReading):
-	'''
-	Accepts only one connection.
-
-	Args:
-		config (dict): Has the keywords "id", "ip" and "port" to
-			establish a socket server.
-			The "id" keyword is the packet identifier for where a
-			reading originates from.
-	'''
+	"""
+	Can only communicate with 1 client once connected.
+	"""
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "ip" and "port" to establish a
+		connection to socket server. "buffer-size" keyword for
+		defining packet size.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 		self.address = (config['ip'], config['port'])
@@ -173,16 +185,18 @@ class TCPServer(ObservableReading):
 
 
 class Serial(ObservableReading):
-	'''
+	"""
 	Args:
-		config (dict): Has the keywords "id", "sn" and "baudrate" to
-			establish connection with a specific serial unit.
-			The "id" keyword is the packet identifier for where a
-			reading originates from.
-			"sn" stands for serial number, which are unique for all
-			serial units.
-	'''
+	"""
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "id", "sn" and "baudrate" to
+		establish connection with a specific serial unit.  The "id"
+		keyword is the packet identifier for where a reading originates from.
+		"sn" stands for serial number, which are unique for all serial units.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 
@@ -223,6 +237,13 @@ class Serial(ObservableReading):
 
 class Bluetooth(ObservableReading):
 	def __init__(self, config):
+		"""
+		:param config: Has the keywords "MAC" to establish a
+		connection to a physical bluetooth unit. Also has "buffer-size"
+		for controlling packet size.
+
+		:type config: dict
+		"""
 		ObservableReading.__init__(self)
 		self.config = config
 		self.bt_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)

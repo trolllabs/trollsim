@@ -1,18 +1,40 @@
+"""
+.. module:: datastructures
+
+Currently the only datastructure in TrollSim is TrollPacket.
+"""
+
 import struct
 from time import perf_counter
 from misc import type_lookup
 
 
 class TrollPacket:
-	'''
-	Internal data representation.
+	"""
+	Internal datapoint representation.
 
 	Args:
 		raw_data (binary): Packet data
 		data (int/float):  Interpreted packet data
-	'''
+	"""
 	meta = None
 	def __init__(self, packet_meta, binary_packet, value=None):
+		"""
+		A standardized network packet, or "TrollSim network packet" is
+		used when describing a binary packet with:
+		- First byte as ID
+		- Last four bytes as value (float/int)
+
+		:param packet_meta: A dictionary with keywords 'name', 'id' and
+		'type'.
+		:param binary_packet: A standardized network packet
+		:param value: If binary_packet is derived from value, just pass
+		value as argument here.
+
+		:type packet_meta: dict
+		:type binary_packet: bytes
+		:type value: int/float
+		"""
 		self.binary_packet = binary_packet
 		self.metadata = packet_meta
 		self.timestamp = int(perf_counter()*1000)
@@ -33,22 +55,78 @@ class TrollPacket:
 		return value
 
 	def _create_network_packet(packet_meta, value):
+		"""
+		Creates a TrollSim network packet, bin(ID (1) + value (4))
+
+		:param packet_meta: Dictionary with keywords for 'name', 'id'
+		and 'type'
+		:param value: Packet value
+
+		:type packet_meta: dict
+		:type value: float/int
+
+		:return: TrollSim network packet
+		"""
 		return struct.pack('>B %s' % type_lookup[type(value)], packet_meta['id'], value)
 
 	def _create_packet(packet_meta, value):
+		"""
+		Creates a TrollPacket from int or float value.
+
+		:param packet_meta: Dictionary with keywords for 'name', 'id'
+		and 'type'
+		:param value: Packet value
+
+		:type packet_meta: dict
+		:type value: float/int
+
+		:return: TrollPacket
+		"""
 		packet_value = TrollPacket._cast_value(packet_meta, value)
 		binary_packet = TrollPacket._create_network_packet(packet_meta, packet_value)
 		return TrollPacket(packet_meta, binary_packet, value)
 
 	def from_name(name, value):
+		"""
+		Extracts relevant metadata based on the name argument before
+		using self._create_packet to instantiate a TrollPacket.
+
+		:param name: A name which can be found in metadata.txt
+		:param value: Packet value
+
+		:type name: str
+		:type value: float/int
+
+		:return: TrollPacket
+		"""
 		packet_meta = TrollPacket.meta['names'][name]
 		return TrollPacket._create_packet(packet_meta, value)
 
 	def from_id(packet_id, value):
+		"""
+		Extracts relevant metadata based on the packet_id argument
+		before using self._create_packet to instantiate a TrollPacket.
+
+		:param packet_id: An ID which can be found in metadata.txt
+		:param value: Packet value
+
+		:type packet_id: uint8
+		:type value: float/int
+
+		:return: TrollPacket
+		"""
 		packet_meta = TrollPacket.meta['ids'][str(packet_id)]
 		return TrollPacket._create_packet(packet_meta, value)
 
 	def from_binary_packet(network_packet):
+		"""
+		Extracts relevant metadata before instantiating a TrollPacket.
+
+		:param network_packet: A TrollSim network packet
+		:type network_packet: bytes
+
+		:return: TrollPacket
+		"""
 		packet_meta = TrollPacket.meta['ids'][str(network_packet[0])]
 		return TrollPacket(packet_meta, network_packet)
 
@@ -142,6 +220,10 @@ class TrollPacket:
 			return self._new_packet(dividend/self.value)
 
 	def __str__(self):
+		"""
+		String representation of the object.
+		Prints various states of interest in formatted text.
+		"""
 		retval = '%s' % type(self).__name__
 		classvars = vars(self)
 		retval += '\n\thex: %s' % self.hex
