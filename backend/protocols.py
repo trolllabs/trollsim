@@ -87,10 +87,6 @@ class UDPServer(ObservableReading):
 	def connect(self):
 		self.ready = True
 
-	def send(self, message):
-		with self.lock:
-			self.sock.sendto(message, self.address)
-
 	def read(self):
 		data, addr = self.sock.recvfrom(self.config['buffer-size'])
 		self._notify_listeners(data)
