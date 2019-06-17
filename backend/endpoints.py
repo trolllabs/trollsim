@@ -52,8 +52,11 @@ class XPlane(ObservableComponent):
 		self.xp_write = UDPClient(config['write'])
 		self.xp_read = UDPServer(config['read'])
 		self.xp_read.add_listener(self.parse_data)
-		self.XP_True = 0x3F800000
-		self.XP_False = 0x00000000
+
+		self.dref_length = 509
+		self.header = 'DREF'
+		self.header_length = len(self.header)
+		self.dref_header = struct.pack('<%ds' % self.header_length, self.header.encode())
 
 		ObservableComponent.__init__(self, self.xp_read, [self.xp_write])
 
@@ -61,15 +64,15 @@ class XPlane(ObservableComponent):
 		return s + '\0'
 
 	def _create_null_pad(self, pad_length):
-		return ('\0'*pad_length).encode()
+		return b'\0'*pad_length
 
-	def _xplane_boolean(self, arg: bool):
-		'''
+	def _xplane_boolean(self, is_true: bool):
+		"""
 		Convert argument to a format X-Plane accepts as boolean value.
 		'''
-		xp_bool = self.XP_False
-		if arg:
-			xp_bool = self.XP_True
+		xp_bool = 0x00000000
+		if is_true:
+			xp_bool = 0x3F800000
 		return 'i', xp_bool
 
 	def wrap(self, value, name, dtype):
